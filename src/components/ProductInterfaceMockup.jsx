@@ -113,7 +113,7 @@ function StructurePanel({ selectedId, onSelect }) {
             type="button"
             aria-pressed={selectedId === node.id}
             onClick={() => onSelect(node.id)}
-            style={{ "--tree-level": node.level, "--tree-indent": `${node.level * 24}px` }}
+            style={{ "--tree-level": node.level }}
           >
             <span className="tree-order">{index + 1}</span>
             <span className="tree-node-label"><strong>{node.label}</strong><small>{getTypeName(node)}</small></span>
@@ -148,20 +148,26 @@ function ElementPreview({ selected }) {
 
 function AiSuggestion({ selected, onApply }) {
   const suggestion = aiSuggestions[selected.id];
+  const titleId = `ai-suggestion-title-${selected.id}`;
 
   return (
-    <section className="ai-suggestion" aria-labelledby="ai-suggestion-title">
-      <header>
-        <strong id="ai-suggestion-title">Sugestão da IA</strong>
-        <span>{suggestion.confidence}% de confiança</span>
+    <section className="ai-suggestion" aria-labelledby={titleId}>
+      <header className="ai-suggestion__header">
+        <div>
+          <strong id={titleId}>Sugestão da IA</strong>
+          <span>Assistente de revisão</span>
+        </div>
+        <span className="ai-suggestion__confidence">{suggestion.confidence}%</span>
       </header>
-      <p>{suggestion.text}</p>
-      <div>
-        <span>Proposta</span>
-        <strong>{suggestion.action}</strong>
+      <p className="ai-suggestion__reason">{suggestion.text}</p>
+      <div className="ai-suggestion__proposal">
+        <div>
+          <span>Proposta</span>
+          <strong>{suggestion.action}</strong>
+        </div>
+        <button type="button" onClick={onApply} aria-label={`Aplicar sugestão: ${suggestion.action}`}>Aplicar</button>
       </div>
-      <button type="button" onClick={onApply}>Aplicar sugestão</button>
-      <small>Confira o resultado antes de continuar.</small>
+      <small className="ai-suggestion__note">Confira o resultado antes de continuar.</small>
     </section>
   );
 }
