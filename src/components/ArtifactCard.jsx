@@ -1,6 +1,6 @@
 export function ArtifactCard({ eyebrow, title, description, preview, onOpen, accent }) {
   return (
-    <button className="artifact-card" type="button" onClick={onOpen} style={{ "--accent": accent }}>
+    <button className="artifact-card" type="button" aria-haspopup="dialog" onClick={onOpen} style={{ "--accent": accent }}>
       <span className="artifact-card__preview" aria-hidden="true">
         {preview}
       </span>

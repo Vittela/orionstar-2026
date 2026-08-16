@@ -30,8 +30,8 @@ function MarkdownOutputViewer() {
     return () => controller.abort();
   }, []);
 
-  if (error) return <div className="research-viewer__status">{error}</div>;
-  if (!source) return <div className="research-viewer__status">Carregando transcrição…</div>;
+  if (error) return <div className="research-viewer__status" role="alert">{error}</div>;
+  if (!source) return <div className="research-viewer__status" role="status" aria-live="polite">Carregando transcrição…</div>;
 
   return <article className="markdown-render"><ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{source}</ReactMarkdown></article>;
 }
@@ -43,20 +43,21 @@ function EpubOutputViewer() {
 
   return (
     <div className="epub-embedded-viewer">
-      <nav aria-label="Navegação da visualização EPUB">
-        <button className={view === "toc" ? "is-active" : ""} type="button" aria-pressed={view === "toc"} onClick={() => setView("toc")}>Sumário</button>
-        <button className={view === "content" ? "is-active" : ""} type="button" aria-pressed={view === "content"} onClick={() => setView("content")}>Conteúdo</button>
-      </nav>
-      <iframe key={source} src={source} title={view === "toc" ? "Sumário do EPUB reconstruído" : "Conteúdo do EPUB reconstruído"} sandbox="allow-same-origin allow-popups" />
+      <div className="epub-embedded-viewer__controls" role="group" aria-label="Navegação da visualização EPUB">
+        <button className={view === "toc" ? "is-active" : ""} type="button" aria-pressed={view === "toc"} aria-controls="epub-preview-frame" onClick={() => setView("toc")}>Sumário</button>
+        <button className={view === "content" ? "is-active" : ""} type="button" aria-pressed={view === "content"} aria-controls="epub-preview-frame" onClick={() => setView("content")}>Conteúdo</button>
+      </div>
+      <iframe id="epub-preview-frame" key={source} src={source} title={view === "toc" ? "Sumário do EPUB reconstruído" : "Conteúdo do EPUB reconstruído"} sandbox="allow-same-origin allow-popups" />
     </div>
   );
 }
 
 function EvidencePanel({ id, title, description, activeStage, children, action }) {
+  const headingId = `comparison-panel-title-${id}`;
   return (
-    <article className={`research-panel research-panel--${id}${activeStage === id ? " is-mobile-active" : ""}`}>
+    <article id={`comparison-panel-${id}`} className={`research-panel research-panel--${id}${activeStage === id ? " is-mobile-active" : ""}`} aria-labelledby={headingId}>
       <header>
-        <div><h3>{title}</h3><p>{description}</p></div>
+        <div><h3 id={headingId}>{title}</h3><p>{description}</p></div>
         {action}
       </header>
       <div className="research-panel__viewport">{children}</div>
@@ -74,22 +75,22 @@ export function AccessibilityComparison() {
         Abaixo, é possível conferir a página digitalizada, o texto gerado pelo Mathpix e o EPUB depois da revisão. Em seguida, a tabela mostra o que mudou de uma versão para outra.
       </p>
 
-      <nav className="comparison-mobile-tabs" aria-label="Selecionar etapa para visualizar">
-        <button className={activeStage === "source" ? "is-active" : ""} type="button" aria-pressed={activeStage === "source"} onClick={() => setActiveStage("source")}>Imagem</button>
-        <button className={activeStage === "markdown" ? "is-active" : ""} type="button" aria-pressed={activeStage === "markdown"} onClick={() => setActiveStage("markdown")}>Markdown</button>
-        <button className={activeStage === "epub" ? "is-active" : ""} type="button" aria-pressed={activeStage === "epub"} onClick={() => setActiveStage("epub")}>EPUB</button>
-      </nav>
+      <div className="comparison-mobile-tabs" role="group" aria-label="Selecionar etapa para visualizar">
+        <button className={activeStage === "source" ? "is-active" : ""} type="button" aria-pressed={activeStage === "source"} aria-controls="comparison-panel-source" onClick={() => setActiveStage("source")}>Imagem</button>
+        <button className={activeStage === "markdown" ? "is-active" : ""} type="button" aria-pressed={activeStage === "markdown"} aria-controls="comparison-panel-markdown" onClick={() => setActiveStage("markdown")}>Markdown</button>
+        <button className={activeStage === "epub" ? "is-active" : ""} type="button" aria-pressed={activeStage === "epub"} aria-controls="comparison-panel-epub" onClick={() => setActiveStage("epub")}>EPUB</button>
+      </div>
 
       <section className="research-panels" aria-label="Visualização das três etapas">
-        <EvidencePanel id="source" title="Imagem de origem" description="Página usada como ponto de partida" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem</a>}>
+        <EvidencePanel id="source" title="Imagem de origem" description="Página usada como ponto de partida" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem<span className="sr-only"> em nova aba</span></a>}>
           <div className="source-image-viewer"><img src={`${base}artifacts/captura-de-livro.png`} alt="Página digitalizada do capítulo Números reais, usada como fonte do experimento." /></div>
         </EvidencePanel>
 
-        <EvidencePanel id="markdown" title="Transcrição em Markdown" description="Texto extraído automaticamente pelo Mathpix" activeStage={activeStage} action={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download>Baixar arquivo</a>}>
+        <EvidencePanel id="markdown" title="Transcrição em Markdown" description="Texto extraído automaticamente pelo Mathpix" activeStage={activeStage} action={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download>Baixar Markdown</a>}>
           <MarkdownOutputViewer />
         </EvidencePanel>
 
-        <EvidencePanel id="epub" title="EPUB reconstruído" description="Versão organizada depois da revisão" activeStage={activeStage} action={<a href={`${base}artifacts/reconstrucao-validada.epub`} download>Baixar arquivo</a>}>
+        <EvidencePanel id="epub" title="EPUB reconstruído" description="Versão organizada depois da revisão" activeStage={activeStage} action={<a href={`${base}artifacts/reconstrucao-validada.epub`} download>Baixar EPUB</a>}>
           <EpubOutputViewer />
         </EvidencePanel>
       </section>
@@ -98,6 +99,7 @@ export function AccessibilityComparison() {
         <h3 id="analysis-title">O que muda entre as versões</h3>
         <div className="analysis-table-wrap">
           <table className="analysis-table">
+            <caption className="sr-only">Comparação de acessibilidade entre a transcrição em Markdown e o EPUB reconstruído</caption>
             <thead><tr><th scope="col">Aspecto</th><th scope="col">Markdown do Mathpix</th><th scope="col">EPUB reconstruído</th></tr></thead>
             <tbody>
               {observations.map(([dimension, markdown, epub]) => <tr key={dimension}><th scope="row">{dimension}</th><td>{markdown}</td><td>{epub}</td></tr>)}
