@@ -4,7 +4,6 @@ import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
-import { SOURCES } from "../data/sources";
 
 const observations = [
   ["Papel no fluxo", "Saída intermediária de reconhecimento e transcrição, adequada para revisão textual.", "Publicação final reconstruída, empacotada para leitura e navegação assistiva."],
@@ -83,8 +82,6 @@ export function AccessibilityComparison() {
         <TextSearch size={19} /><div><strong id="research-question-title">Questão observada</strong><p>Quais informações são preservadas pela transcrição automatizada e quais dependem de reconstrução semântica e revisão humana para formar uma publicação acessível?</p></div>
       </section>
 
-      <p className="comparison-method-note">Os formatos não são tratados como produtos concorrentes. O Markdown é uma saída intermediária de OCR; o EPUB é o resultado posterior de organização, enriquecimento e validação editorial orientado pela <a href={SOURCES.epubAccessibility.url} target="_blank" rel="noreferrer">EPUB Accessibility 1.1</a> e pelas <a href={SOURCES.wcag.url} target="_blank" rel="noreferrer">WCAG 2.2</a>.</p>
-
       <nav className="comparison-mobile-tabs" aria-label="Selecionar estágio para visualizar">
         <button className={activeStage === "source" ? "is-active" : ""} type="button" onClick={() => setActiveStage("source")}>Fonte</button>
         <button className={activeStage === "markdown" ? "is-active" : ""} type="button" onClick={() => setActiveStage("markdown")}>Markdown</button>
@@ -100,7 +97,7 @@ export function AccessibilityComparison() {
           <MarkdownOutputViewer />
         </EvidencePanel>
 
-        <EvidencePanel id="epub" label="03" title="EPUB reconstruído" description="Publicação semântica após revisão" icon={<Library size={17} />} activeStage={activeStage} actions={<><a href={SOURCES.epubAccessibility.url} target="_blank" rel="noreferrer" aria-label="Consultar EPUB Accessibility 1.1"><ExternalLink size={15} /></a><a href={`${base}artifacts/reconstrucao-validada.epub`} download aria-label="Baixar EPUB"><Download size={15} /></a></>}>
+        <EvidencePanel id="epub" label="03" title="EPUB reconstruído" description="Publicação semântica após revisão" icon={<Library size={17} />} activeStage={activeStage} actions={<a href={`${base}artifacts/reconstrucao-validada.epub`} download aria-label="Baixar EPUB"><Download size={15} /></a>}>
           <EpubOutputViewer />
         </EvidencePanel>
       </section>
@@ -113,15 +110,7 @@ export function AccessibilityComparison() {
         </div>
       </section>
 
-      <aside className="comparison-source-links" aria-label="Referências relacionadas à análise">
-        <span>Fontes relacionadas</span>
-        <a href={SOURCES.pdfReadingOrder.url} target="_blank" rel="noreferrer">W3C · ordem de leitura em PDF</a>
-        <a href={SOURCES.mathml.url} target="_blank" rel="noreferrer">W3C · MathML Core</a>
-        <a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a>
-        <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a>
-      </aside>
-
-      <section className="comparison-conclusion"><strong>Síntese</strong><p>A transcrição Markdown preserva com boa qualidade o texto e a notação matemática, cumprindo bem seu papel como base editável. A acessibilidade do EPUB surge em uma etapa distinta: revisão da ordem, marcação estrutural, reinserção e descrição de figuras, conversão para <a href={SOURCES.mathml.url} target="_blank" rel="noreferrer">MathML</a>, navegação e metadados. A verificação combina <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a>, <a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> e revisão humana.</p></section>
+      <section className="comparison-conclusion"><strong>Síntese</strong><p>A transcrição Markdown preserva com boa qualidade o texto e a notação matemática, cumprindo bem seu papel como base editável. A acessibilidade do EPUB surge em uma etapa distinta: revisão da ordem, marcação estrutural, reinserção e descrição de figuras, conversão para MathML, navegação e metadados. A verificação combina ferramentas automatizadas e revisão humana.</p></section>
     </div>
   );
 }

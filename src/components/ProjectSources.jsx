@@ -42,9 +42,6 @@ export function ProjectSources() {
           </section>
         ))}
       </div>
-      <p className="project-sources__note">
-        O <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a> verifica conformidade técnica com as especificações EPUB; o <a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> auxilia a avaliação automatizada de acessibilidade. Ambos complementam, mas não substituem, revisão humana e testes com tecnologias assistivas.
-      </p>
     </footer>
   );
 }
