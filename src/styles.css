@@ -910,18 +910,18 @@ button { font: inherit; }
 .structure-tree { padding: 8px 7px 12px; }
 .structure-tree > button {
   position: relative;
-  width: 100%;
+  width: calc(100% - (var(--tree-level) * 14px));
   grid-template-columns: 24px minmax(0, 1fr) auto;
   gap: 7px;
-  margin: 0 0 3px;
-  padding: 9px 7px 9px calc(10px + var(--tree-indent));
+  margin: 0 0 4px calc(var(--tree-level) * 14px);
+  padding: 9px 7px;
   color: #403b43;
+  border-left: 3px solid var(--tree-accent);
   border-radius: 5px;
 }
-.structure-tree > button::before { position: absolute; top: -2px; bottom: -2px; left: calc(19px + var(--tree-indent) - 24px); width: 1px; background: #c9c4cb; content: ""; }
-.structure-tree > button::after { position: absolute; top: 50%; left: calc(19px + var(--tree-indent) - 24px); width: 12px; border-top: 1px solid #c9c4cb; content: ""; }
-.structure-tree > button.tree-level-0::before,
-.structure-tree > button.tree-level-0::after { display: none; }
+.structure-tree > button.tree-level-0 { --tree-accent: #6d5bd0; }
+.structure-tree > button.tree-level-1 { --tree-accent: #a69cda; }
+.structure-tree > button.tree-level-2 { --tree-accent: #d3cee9; }
 .structure-tree > button.is-selected { background: #f0eef8; border-color: #b5addd; box-shadow: inset 2px 0 #6d5bd0; }
 .tree-order { color: #77717b; font-size: 0.65rem; }
 .tree-node-label strong { font-size: 0.72rem; }
@@ -946,18 +946,23 @@ button { font: inherit; }
 .element-preview__message { margin: 10px 0 0; padding: 10px; color: #78383d; background: #fff0f0; border: 1px solid #d8a2a4; border-radius: 5px; font-size: 0.7rem; line-height: 1.45; }
 .element-preview blockquote { margin: 10px 0 0; padding: 10px; background: #fff; border-left: 3px solid #6d5bd0; font-size: 0.74rem; }
 .inspector-form { min-height: 0; overflow-y: auto; padding: 12px; }
-.ai-suggestion { margin-bottom: 14px; padding: 11px; color: #49434d; background: #f0eef8; border: 1px solid #b5addd; border-radius: 6px; }
-.ai-suggestion > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ai-suggestion > header strong { color: #493ca7; font-size: 0.72rem; }
-.ai-suggestion > header span { color: #625a77; font-size: 0.64rem; }
-.ai-suggestion > p { margin: 8px 0 10px; font-size: 0.7rem; line-height: 1.5; }
-.ai-suggestion > div { padding: 8px 0; border-top: 1px solid #d4cfee; border-bottom: 1px solid #d4cfee; }
-.ai-suggestion > div span,
-.ai-suggestion > div strong { display: block; }
-.ai-suggestion > div span { margin-bottom: 2px; color: #756e80; font-size: 0.62rem; }
-.ai-suggestion > div strong { color: #302d33; font-size: 0.7rem; }
-.ai-suggestion > button { width: 100%; margin-top: 10px; padding: 8px; color: #fff; background: #5143a7; border: 0; border-radius: 5px; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
-.ai-suggestion > small { display: block; margin-top: 6px; color: #756e80; font-size: 0.61rem; line-height: 1.4; }
+.ai-suggestion { overflow: hidden; margin-bottom: 14px; color: #49434d; background: #f8f7fc; border: 1px solid #b5addd; border-radius: 7px; }
+.ai-suggestion__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 10px 11px; background: #f0eef8; border-bottom: 1px solid #d4cfee; }
+.ai-suggestion__header > div { min-width: 0; }
+.ai-suggestion__header strong,
+.ai-suggestion__header span { display: block; }
+.ai-suggestion__header strong { color: #493ca7; font-size: 0.72rem; }
+.ai-suggestion__header > div span { margin-top: 2px; color: #716a7c; font-size: 0.61rem; }
+.ai-suggestion__confidence { flex: 0 0 auto; padding: 3px 6px; color: #493ca7; background: #fff; border: 1px solid #c8c1e6; border-radius: 999px; font-size: 0.64rem; font-weight: 700; }
+.ai-suggestion__reason { margin: 0; padding: 10px 11px; font-size: 0.7rem; line-height: 1.5; }
+.ai-suggestion__proposal { display: grid; align-items: center; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; margin: 0 11px; padding: 9px 0; border-top: 1px solid #e0dced; }
+.ai-suggestion__proposal > div { min-width: 0; }
+.ai-suggestion__proposal span,
+.ai-suggestion__proposal strong { display: block; }
+.ai-suggestion__proposal span { margin-bottom: 2px; color: #756e80; font-size: 0.61rem; }
+.ai-suggestion__proposal strong { color: #302d33; font-size: 0.69rem; line-height: 1.35; }
+.ai-suggestion__proposal button { padding: 7px 9px; color: #fff; background: #5143a7; border: 0; border-radius: 5px; font-size: 0.66rem; font-weight: 700; cursor: pointer; }
+.ai-suggestion__note { display: block; padding: 0 11px 10px; color: #756e80; font-size: 0.59rem; line-height: 1.4; }
 .inspector-form > label { margin-bottom: 11px; color: #4f4952; font-size: 0.68rem; letter-spacing: 0; text-transform: none; }
 .inspector-form textarea,
 .inspector-form select,
