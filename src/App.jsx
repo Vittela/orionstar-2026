@@ -2,6 +2,8 @@ import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
 import { ArtifactModal } from "./components/ArtifactModal";
 import { AccessibilityComparison } from "./components/AccessibilityComparison";
+import { BookReaderMockup } from "./components/BookReaderMockup";
+import { BookReaderPreview } from "./components/BookReaderPreview";
 import { ComparisonPreview } from "./components/ComparisonPreview";
 import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
@@ -25,7 +27,7 @@ const artifacts = [
     title: "Livro navegável",
     description: "Mockup interativo da leitura reconstruída.",
     accent: "#e07a5f",
-    preview: <div className="placeholder-preview placeholder-preview--book"><i /><i /><i /></div>,
+    preview: <BookReaderPreview />,
   },
   {
     id: "comparison",
@@ -74,7 +76,13 @@ export default function App() {
         </ArtifactModal>
       )}
 
-      {selectedArtifact && !["flow", "comparison"].includes(selectedArtifact) && (
+      {selectedArtifact === "mockup" && (
+        <ArtifactModal eyebrow="02 · Experiência" title="Livro navegável" onClose={closeArtifact}>
+          <BookReaderMockup />
+        </ArtifactModal>
+      )}
+
+      {selectedArtifact && !["flow", "comparison", "mockup"].includes(selectedArtifact) && (
         <ArtifactModal eyebrow="Artefato" title="Visualização em construção" onClose={closeArtifact}>
           <div className="viewer-status"><strong>Este artefato será integrado na próxima etapa.</strong></div>
         </ArtifactModal>
