@@ -140,7 +140,7 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
         </>}
 
         {selected.type === "formula" && <>
-          <div className="mathml-preview"><small>PRÉVIA <a href={SOURCES.mathml.url} target="_blank" rel="noreferrer">MATHML<ExternalLink size={9} /></a></small><span>√2 ≈ 1,4142136</span></div>
+          <div className="mathml-preview"><small>PRÉVIA MATHML</small><span>√2 ≈ 1,4142136</span></div>
           <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="4" /></label>
           <button className="ai-suggestion" type="button" onClick={() => onMessage("Descrição sugerida; confirme a pronúncia antes de aprovar.")}><Sparkles size={14} />Sugerir descrição</button>
         </>}
@@ -191,7 +191,7 @@ function CompliancePanel({ onSelectIssue }) {
         <a href={SOURCES.ace.url} target="_blank" rel="noreferrer"><strong>Ace by DAISY</strong><small>Avaliação automatizada de acessibilidade</small><ExternalLink size={11} /></a>
         <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer"><strong>EPUBCheck</strong><small>Conformidade técnica do pacote EPUB</small><ExternalLink size={11} /></a>
       </div>
-      <div className="compliance-badge"><AlertTriangle size={17} /><span><strong><a href={SOURCES.epubAccessibility.url} target="_blank" rel="noreferrer">EPUB Accessibility 1.1</a></strong><small><a href={SOURCES.wcag.url} target="_blank" rel="noreferrer">WCAG 2.2 AA</a> · declaração pendente</small></span></div>
+      <div className="compliance-badge"><AlertTriangle size={17} /><span><strong>EPUB Accessibility 1.1</strong><small>WCAG 2.2 AA · declaração pendente</small></span></div>
     </section>
   );
 }
