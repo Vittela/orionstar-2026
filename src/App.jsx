@@ -28,7 +28,7 @@ const artifacts = [
     id: "mockup",
     eyebrow: "02 · Interface",
     title: "Conversor acessível",
-    description: "Uma proposta de tela para importar o arquivo, revisar a estrutura e preparar o EPUB.",
+    description: "A IA propõe a estrutura do documento; a pessoa revisa antes de gerar o EPUB.",
     accent: "#e07a5f",
     preview: <img className="artifact-preview-image artifact-preview-image--interface" src={previewPath("interface.svg")} alt="" />,
   },
