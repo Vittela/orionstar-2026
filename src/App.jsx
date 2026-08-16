@@ -1,6 +1,8 @@
 import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
 import { ArtifactModal } from "./components/ArtifactModal";
+import { AccessibilityComparison } from "./components/AccessibilityComparison";
+import { ComparisonPreview } from "./components/ComparisonPreview";
 import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
 
@@ -31,7 +33,7 @@ const artifacts = [
     title: "Comparativo de formatos",
     description: "Imagem, PDF com OCR e EPUB acessível lado a lado.",
     accent: "#3a8d73",
-    preview: <div className="placeholder-preview placeholder-preview--comparison"><i /><i /><i /></div>,
+    preview: <ComparisonPreview />,
   },
 ];
 
@@ -66,7 +68,13 @@ export default function App() {
         </ArtifactModal>
       )}
 
-      {selectedArtifact && selectedArtifact !== "flow" && (
+      {selectedArtifact === "comparison" && (
+        <ArtifactModal eyebrow="03 · Evidências" title="Comparativo de formatos" onClose={closeArtifact}>
+          <AccessibilityComparison />
+        </ArtifactModal>
+      )}
+
+      {selectedArtifact && !["flow", "comparison"].includes(selectedArtifact) && (
         <ArtifactModal eyebrow="Artefato" title="Visualização em construção" onClose={closeArtifact}>
           <div className="viewer-status"><strong>Este artefato será integrado na próxima etapa.</strong></div>
         </ArtifactModal>
