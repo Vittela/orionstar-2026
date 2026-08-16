@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
+import { ArtifactModal } from "./components/ArtifactModal";
+import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
+
+const ExcalidrawViewer = lazy(() =>
+  import("./components/ExcalidrawViewer").then((module) => ({ default: module.ExcalidrawViewer })),
+);
 
 const artifacts = [
   {
@@ -9,7 +15,7 @@ const artifacts = [
     title: "Fluxo do sistema",
     description: "Da captura digital à publicação acessível.",
     accent: "#6d5bd0",
-    preview: <div className="placeholder-preview placeholder-preview--flow"><i /><i /><i /><i /></div>,
+    preview: <FlowPreview />,
   },
   {
     id: "mockup",
@@ -31,6 +37,7 @@ const artifacts = [
 
 export default function App() {
   const [selectedArtifact, setSelectedArtifact] = useState(null);
+  const closeArtifact = useCallback(() => setSelectedArtifact(null), []);
 
   return (
     <main className="site-shell">
@@ -51,11 +58,18 @@ export default function App() {
         </div>
       </section>
 
-      {selectedArtifact && (
-        <div className="foundation-overlay" role="dialog" aria-modal="true">
-          <p>Visualização de {selectedArtifact} em construção.</p>
-          <button type="button" onClick={() => setSelectedArtifact(null)}>Fechar</button>
-        </div>
+      {selectedArtifact === "flow" && (
+        <ArtifactModal eyebrow="01 · Processo" title="Fluxo do sistema" onClose={closeArtifact}>
+          <Suspense fallback={<div className="viewer-status"><span className="viewer-spinner" aria-hidden="true" /><strong>Preparando o visualizador…</strong></div>}>
+            <ExcalidrawViewer file="diagrams/fluxo.excalidraw" />
+          </Suspense>
+        </ArtifactModal>
+      )}
+
+      {selectedArtifact && selectedArtifact !== "flow" && (
+        <ArtifactModal eyebrow="Artefato" title="Visualização em construção" onClose={closeArtifact}>
+          <div className="viewer-status"><strong>Este artefato será integrado na próxima etapa.</strong></div>
+        </ArtifactModal>
       )}
     </main>
   );
