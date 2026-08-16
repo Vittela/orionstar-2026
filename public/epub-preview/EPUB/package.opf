@@ -3,18 +3,19 @@
          version="3.0"
          unique-identifier="pub-id"
          xml:lang="pt-BR"
-         prefix="schema: http://schema.org/ a11y: http://www.idpf.org/epub/vocab/package/a11y/#">
+         prefix="schema: http://schema.org/">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
     <dc:identifier id="pub-id">urn:uuid:59a9b8da-204f-4a19-a245-9bcd60978660</dc:identifier>
-    <dc:title id="title">Números reais</dc:title>
+    <dc:title id="title">Pré-cálculo — Capítulo 1: Números reais</dc:title>
     <meta refines="#title" property="title-type">main</meta>
-    <dc:creator id="creator">Autoria não identificada na captura fornecida</dc:creator>
+    <dc:creator id="creator">Francisco Magalhães Gomes</dc:creator>
+    <dc:publisher>Cengage Learning</dc:publisher>
     <dc:language>pt-BR</dc:language>
     <dc:date>2026-08-16</dc:date>
     <dc:description>Conteúdo didático sobre números irracionais e o conjunto dos números reais.</dc:description>
-    <dc:source>Captura de uma página impressa fornecida pelo usuário; obra, edição e ISBN não identificáveis na imagem.</dc:source>
-    <dc:rights>Material derivado da captura fornecida pelo usuário; os direitos do conteúdo pertencem aos respectivos titulares.</dc:rights>
-    <meta property="dcterms:modified">2026-08-16T16:24:12Z</meta>
+    <dc:source>GOMES, Francisco Magalhães. Pré-cálculo: operações, equações, funções e trigonometria. 1. ed. São Paulo: Cengage Learning, 2019. p. 3. ISBN 978-85-221-2789-4.</dc:source>
+    <dc:rights>Página reproduzida como amostra acadêmica. Os direitos da obra original pertencem aos respectivos titulares.</dc:rights>
+    <meta property="dcterms:modified">2026-08-16T21:22:11Z</meta>
 
     <meta property="schema:accessMode">textual</meta>
     <meta property="schema:accessMode">visual</meta>
@@ -29,9 +30,6 @@
     <meta property="schema:accessibilityFeature">tableOfContents</meta>
     <meta property="schema:accessibilityHazard">none</meta>
     <meta property="schema:accessibilitySummary">Publicação refluível com texto Unicode, estrutura semântica, MathML com alternativas textuais, ordem de leitura linear, sumário e descrições estendidas para todas as figuras. Não contém áudio, animação ou interatividade.</meta>
-    <meta property="dcterms:conformsTo" id="conf">EPUB Accessibility 1.1 - WCAG 2.2 Level AA</meta>
-    <meta property="a11y:certifiedBy" refines="#conf" id="certifier">OpenAI Codex — verificação técnica automatizada e revisão manual deste EPUB</meta>
-    <meta property="dcterms:date" refines="#certifier">2026-08-16</meta>
   </metadata>
 
   <manifest>
