@@ -1,6 +1,7 @@
 @namespace epub "http://www.idpf.org/2007/ops";
 
 :root {
+  color-scheme: light;
   color: #111111;
   background: #ffffff;
   font-family: serif;
@@ -147,31 +148,4 @@ figcaption {
 .callout {
   padding-inline-start: 0.9em;
   border-inline-start: 0.25em solid #7a001f;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root,
-  body {
-    color: #ffffff;
-    background: #111111;
-  }
-
-  a {
-    color: #8fc8ff;
-  }
-
-  aside {
-    color: #ffffff;
-    background: #222222;
-    border-color: #cccccc;
-  }
-
-  figure {
-    border-color: #bbbbbb;
-  }
-
-  figure img {
-    background: #ffffff;
-  }
-
 }
