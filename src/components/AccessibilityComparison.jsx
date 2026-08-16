@@ -5,13 +5,13 @@ import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 
 const observations = [
-  ["Papel no fluxo", "Saída intermediária de reconhecimento e transcrição, adequada para revisão textual.", "Publicação final reconstruída, empacotada para leitura e navegação assistiva."],
-  ["Texto e fórmulas", "Transcrição legível e fórmulas preservadas em LaTeX, inclusive frações, raízes e símbolos.", "Texto revisado em Unicode e expressões convertidas para MathML com alternativas textuais."],
-  ["Estrutura semântica", "O arquivo recebido é texto corrido: títulos e exemplos são reconhecíveis visualmente, mas não usam marcações de heading.", "Capítulo, seções, notas e figuras são representados por elementos semânticos explícitos."],
-  ["Ordem de leitura", "Lineariza o conteúdo, mas posiciona a caixa “No computador” e a Figura 1.3 antes do trecho principal correspondente.", "A sequência foi reorganizada editorialmente para leitura contínua e navegação por seções."],
-  ["Conteúdo visual", "Preserva as chamadas e legendas das figuras, mas não incorpora as três imagens nem descreve seu conteúdo.", "Incorpora as figuras, legendas, textos alternativos e descrições detalhadas."],
-  ["Navegação e metadados", "Não se propõe a fornecer sumário EPUB, landmarks ou metadados de acessibilidade.", "Inclui documento de navegação, landmarks, idioma e metadados de acessibilidade."],
-  ["Intervenção humana", "Oferece uma base editável de boa qualidade, mas ainda exige organização, conferência e complementação.", "Registra o resultado da revisão: corrige ordem, adiciona semântica e produz equivalentes para conteúdo não textual."],
+  ["Uso no projeto", "É o ponto de partida para revisar o texto e as fórmulas extraídos pelo OCR.", "É a versão preparada para leitura e navegação com tecnologias assistivas."],
+  ["Texto e fórmulas", "O texto está legível e as fórmulas foram preservadas em LaTeX, incluindo frações, raízes e símbolos.", "O texto foi revisado, e as expressões matemáticas foram convertidas para MathML com alternativas textuais."],
+  ["Estrutura do documento", "Embora títulos e exemplos sejam visíveis, o Markdown não os identifica como cabeçalhos.", "Capítulo, seções, notas e figuras receberam marcação semântica."],
+  ["Ordem de leitura", "A caixa “No computador” e a Figura 1.3 aparecem antes do trecho principal ao qual se referem.", "A ordem foi ajustada para que o conteúdo possa ser lido de forma contínua e navegado por seções."],
+  ["Figuras", "O texto mantém as chamadas e legendas, mas as três imagens não foram incluídas nem descritas.", "As figuras foram incluídas com legendas, textos alternativos e descrições mais detalhadas."],
+  ["Navegação e metadados", "O Markdown não contém sumário de EPUB, landmarks nem metadados de acessibilidade.", "O EPUB inclui sumário, landmarks, idioma e metadados de acessibilidade."],
+  ["Trabalho de revisão", "A transcrição oferece uma boa base, mas ainda precisa ser organizada, conferida e complementada.", "Na versão final, a ordem foi corrigida, a estrutura foi marcada e o conteúdo visual recebeu equivalentes textuais."],
 ];
 
 function MarkdownOutputViewer() {
@@ -71,7 +71,7 @@ export function AccessibilityComparison() {
   return (
     <div className="academic-comparison">
       <p className="comparison-lead">
-        A mesma página é apresentada em três etapas: a imagem digitalizada, a transcrição automática e o EPUB reconstruído. Os painéis permitem consultar o conteúdo de cada arquivo; a tabela registra as diferenças observadas.
+        Abaixo, é possível conferir a página digitalizada, o texto gerado pelo Mathpix e o EPUB depois da revisão. Em seguida, a tabela mostra o que mudou de uma versão para outra.
       </p>
 
       <nav className="comparison-mobile-tabs" aria-label="Selecionar etapa para visualizar">
@@ -81,24 +81,24 @@ export function AccessibilityComparison() {
       </nav>
 
       <section className="research-panels" aria-label="Visualização das três etapas">
-        <EvidencePanel id="source" title="Imagem de origem" description="Página digitalizada usada no experimento" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem</a>}>
+        <EvidencePanel id="source" title="Imagem de origem" description="Página usada como ponto de partida" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem</a>}>
           <div className="source-image-viewer"><img src={`${base}artifacts/captura-de-livro.png`} alt="Página digitalizada do capítulo Números reais, usada como fonte do experimento." /></div>
         </EvidencePanel>
 
-        <EvidencePanel id="markdown" title="Transcrição em Markdown" description="Saída automática do Mathpix com fórmulas em LaTeX" activeStage={activeStage} action={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download>Baixar arquivo</a>}>
+        <EvidencePanel id="markdown" title="Transcrição em Markdown" description="Texto extraído automaticamente pelo Mathpix" activeStage={activeStage} action={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download>Baixar arquivo</a>}>
           <MarkdownOutputViewer />
         </EvidencePanel>
 
-        <EvidencePanel id="epub" title="EPUB reconstruído" description="Conteúdo reorganizado e enriquecido após revisão" activeStage={activeStage} action={<a href={`${base}artifacts/reconstrucao-validada.epub`} download>Baixar arquivo</a>}>
+        <EvidencePanel id="epub" title="EPUB reconstruído" description="Versão organizada depois da revisão" activeStage={activeStage} action={<a href={`${base}artifacts/reconstrucao-validada.epub`} download>Baixar arquivo</a>}>
           <EpubOutputViewer />
         </EvidencePanel>
       </section>
 
       <section className="comparison-analysis" aria-labelledby="analysis-title">
-        <h3 id="analysis-title">Diferenças observadas</h3>
+        <h3 id="analysis-title">O que muda entre as versões</h3>
         <div className="analysis-table-wrap">
           <table className="analysis-table">
-            <thead><tr><th scope="col">Dimensão</th><th scope="col">Markdown do Mathpix</th><th scope="col">EPUB reconstruído</th></tr></thead>
+            <thead><tr><th scope="col">Aspecto</th><th scope="col">Markdown do Mathpix</th><th scope="col">EPUB reconstruído</th></tr></thead>
             <tbody>
               {observations.map(([dimension, markdown, epub]) => <tr key={dimension}><th scope="row">{dimension}</th><td>{markdown}</td><td>{epub}</td></tr>)}
             </tbody>
@@ -107,8 +107,8 @@ export function AccessibilityComparison() {
       </section>
 
       <section className="comparison-conclusion">
-        <h3>Síntese</h3>
-        <p>A transcrição preserva bem o texto e a notação matemática e funciona como base editável. O EPUB acrescenta a revisão da ordem de leitura, marcação estrutural, figuras com descrições, navegação e metadados. Ferramentas automatizadas ajudam na verificação, mas a revisão humana continua necessária.</p>
+        <h3>Em resumo</h3>
+        <p>O Mathpix preserva bem o texto e a notação matemática, por isso sua transcrição é um bom ponto de partida. Para chegar ao EPUB, ainda foi preciso corrigir a ordem de leitura, marcar a estrutura, incluir as figuras e escrever suas descrições. As ferramentas de verificação ajudam, mas não substituem essa revisão.</p>
       </section>
     </div>
   );

@@ -148,12 +148,12 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
         {selected.type === "figure" && <>
           <label>Texto alternativo<textarea value={altText} onChange={(event) => setAltText(event.target.value)} rows="4" /></label>
           <label>Descrição longa<textarea placeholder="Descreva relações, dados e contexto visual…" rows="4" /></label>
-          <button className="secondary-action" type="button" onClick={() => { setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento."); onMessage("Sugestão inserida como rascunho; revise antes de aprovar."); }}>Sugerir texto alternativo</button>
+          <button className="secondary-action" type="button" onClick={() => { setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento."); onMessage("Sugestão adicionada. Revise o texto antes de continuar."); }}>Sugerir texto alternativo</button>
         </>}
 
         {selected.type === "formula" && <>
           <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="5" /></label>
-          <button className="secondary-action" type="button" onClick={() => onMessage("Descrição sugerida; confirme a pronúncia antes de aprovar.")}>Sugerir descrição</button>
+          <button className="secondary-action" type="button" onClick={() => onMessage("Descrição adicionada. Confira a pronúncia antes de continuar.")}>Sugerir descrição</button>
         </>}
 
         {selected.type === "table" && <>
@@ -192,8 +192,8 @@ function WorkspaceScreen() {
         <button className={mobileTab === "inspector" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "inspector"} onClick={() => setMobileTab("inspector")}>Elemento</button>
       </nav>
       <footer className="workspace-actions">
-        <span aria-live="polite">{message || "Protótipo navegável; nenhuma alteração é enviada."}</span>
-        <button type="button" onClick={() => setMessage("Prévia de leitura iniciada para o elemento selecionado.")}>Ouvir prévia</button>
+        <span aria-live="polite">{message || "Este é um protótipo: as alterações não são salvas."}</span>
+        <button type="button" onClick={() => setMessage("A leitura em voz alta seria iniciada aqui.")}>Ouvir prévia</button>
         <button className="workspace-export" type="button" onClick={() => setMessage("Revise os três itens pendentes antes de exportar.")}>Exportar EPUB</button>
       </footer>
     </section>
