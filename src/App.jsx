@@ -13,6 +13,15 @@ const AccessibilityComparison = lazy(() =>
   import("./components/AccessibilityComparison").then((module) => ({ default: module.AccessibilityComparison })),
 );
 
+function LoadingStatus({ children }) {
+  return (
+    <div className="viewer-status" role="status" aria-live="polite" aria-atomic="true">
+      <span className="viewer-spinner" aria-hidden="true" />
+      <strong>{children}</strong>
+    </div>
+  );
+}
+
 const previewPath = (file) => `${import.meta.env.BASE_URL}previews/${file}`;
 
 const artifacts = [
@@ -47,27 +56,31 @@ export default function App() {
   const closeArtifact = useCallback(() => setSelectedArtifact(null), []);
 
   return (
-    <main className="site-shell">
-      <Header />
-      <section className="artifact-section" aria-labelledby="artifacts-title">
-        <div className="section-heading">
-          <p className="section-kicker">O projeto na prática</p>
-          <h2 id="artifacts-title">Da digitalização ao EPUB acessível</h2>
-          <p>Consulte o fluxo de trabalho, experimente a proposta de interface e compare a página original com a transcrição e o EPUB revisado.</p>
-        </div>
+    <>
+      <div id="site-content" className="site-shell">
+        <a className="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+        <Header />
+        <main id="main-content" className="site-main" tabIndex="-1">
+          <section className="artifact-section" aria-labelledby="artifacts-title">
+            <div className="section-heading">
+              <p className="section-kicker">O projeto na prática</p>
+              <h2 id="artifacts-title">Da digitalização ao EPUB acessível</h2>
+              <p>Consulte o fluxo de trabalho, experimente a proposta de interface e compare a página original com a transcrição e o EPUB revisado.</p>
+            </div>
 
-        <div className="artifact-grid">
-          {artifacts.map((artifact) => (
-            <ArtifactCard key={artifact.id} {...artifact} onOpen={() => setSelectedArtifact(artifact.id)} />
-          ))}
-        </div>
-      </section>
-
-      <ProjectSources />
+            <div className="artifact-grid">
+              {artifacts.map((artifact) => (
+                <ArtifactCard key={artifact.id} {...artifact} onOpen={() => setSelectedArtifact(artifact.id)} />
+              ))}
+            </div>
+          </section>
+        </main>
+        <ProjectSources />
+      </div>
 
       {selectedArtifact === "flow" && (
         <ArtifactModal eyebrow="01 · Etapas" title="Fluxo do projeto" onClose={closeArtifact}>
-          <Suspense fallback={<div className="viewer-status"><span className="viewer-spinner" aria-hidden="true" /><strong>Preparando o visualizador…</strong></div>}>
+          <Suspense fallback={<LoadingStatus>Preparando o visualizador…</LoadingStatus>}>
             <ExcalidrawViewer file="diagrams/fluxo.excalidraw" />
           </Suspense>
         </ArtifactModal>
@@ -75,7 +88,7 @@ export default function App() {
 
       {selectedArtifact === "comparison" && (
         <ArtifactModal eyebrow="03 · Comparação" title="Comparação entre versões" onClose={closeArtifact}>
-          <Suspense fallback={<div className="viewer-status"><span className="viewer-spinner" aria-hidden="true" /><strong>Preparando a comparação…</strong></div>}>
+          <Suspense fallback={<LoadingStatus>Preparando a comparação…</LoadingStatus>}>
             <AccessibilityComparison />
           </Suspense>
         </ArtifactModal>
@@ -89,9 +102,9 @@ export default function App() {
 
       {selectedArtifact && !["flow", "comparison", "mockup"].includes(selectedArtifact) && (
         <ArtifactModal eyebrow="Conteúdo" title="Visualização em construção" onClose={closeArtifact}>
-          <div className="viewer-status"><strong>Esta parte será acrescentada na próxima etapa.</strong></div>
+          <div className="viewer-status" role="status"><strong>Esta parte será acrescentada na próxima etapa.</strong></div>
         </ArtifactModal>
       )}
-    </main>
+    </>
   );
 }

@@ -4,6 +4,8 @@ Interactive presentation of the project **Accessible semantic reconstruction of 
 
 Developed by João Victor Correia de Araujo da Silva through OrionHub Lab at UFAL for the OrionStar 2026 competition.
 
+The current accessibility review, resolved findings, validation scope, and remaining manual checks are recorded in [`docs/accessibility-audit.md`](docs/accessibility-audit.md).
+
 ## Development
 
 ```bash

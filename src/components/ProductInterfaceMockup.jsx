@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { SOURCES } from "../data/sources";
 
 const nodes = [
@@ -37,6 +38,9 @@ function FigurePreview({ selected }) {
   const [expanded, setExpanded] = useState(false);
   const triggerRef = useRef(null);
   const closeRef = useRef(null);
+  const lightboxTitleRef = useRef(null);
+  const lightboxTitleId = useId();
+  const lightboxId = useId();
   const source = `${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`;
 
   const closePreview = useCallback(() => {
@@ -47,7 +51,14 @@ function FigurePreview({ selected }) {
   useEffect(() => {
     if (!expanded) return undefined;
 
-    closeRef.current?.focus();
+    const parentDialog = triggerRef.current?.closest(".artifact-modal");
+    const wasParentInert = parentDialog?.inert ?? false;
+    const previousAriaHidden = parentDialog?.getAttribute("aria-hidden");
+    lightboxTitleRef.current?.focus();
+    if (parentDialog) {
+      parentDialog.inert = true;
+      parentDialog.setAttribute("aria-hidden", "true");
+    }
     const handleKeyDown = (event) => {
       if (event.key === "Tab") {
         event.preventDefault();
@@ -61,31 +72,49 @@ function FigurePreview({ selected }) {
     };
 
     window.addEventListener("keydown", handleKeyDown, true);
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
+    return () => {
+      if (parentDialog) {
+        parentDialog.inert = wasParentInert;
+        if (previousAriaHidden === null) parentDialog.removeAttribute("aria-hidden");
+        else parentDialog.setAttribute("aria-hidden", previousAriaHidden);
+      }
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
   }, [closePreview, expanded]);
 
   return (
     <>
       <figure className="figure-preview">
-        <button ref={triggerRef} className="figure-preview__trigger" type="button" onClick={() => setExpanded(true)} aria-label={`Ampliar ${selected.label}`}>
+        <button
+          ref={triggerRef}
+          className="figure-preview__trigger"
+          type="button"
+          aria-label={`Ampliar ${selected.label}`}
+          aria-haspopup="dialog"
+          aria-expanded={expanded}
+          aria-controls={expanded ? lightboxId : undefined}
+          onClick={() => setExpanded(true)}
+        >
           <img src={source} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" />
           <span>Ampliar figura</span>
         </button>
         <figcaption>A imagem é exibida por inteiro. Selecione para abrir em tamanho maior.</figcaption>
       </figure>
 
-      {expanded && (
-        <div className="figure-lightbox" role="dialog" aria-modal="true" aria-labelledby="figure-lightbox-title" onMouseDown={(event) => event.target === event.currentTarget && closePreview()}>
-          <div className="figure-lightbox__dialog">
+      {expanded && createPortal(
+        <div className="figure-lightbox">
+          <button className="modal-backdrop-dismiss" type="button" tabIndex="-1" aria-hidden="true" onClick={closePreview} />
+          <section id={lightboxId} className="figure-lightbox__dialog" role="dialog" aria-modal="true" aria-labelledby={lightboxTitleId}>
             <header>
-              <div><span>Visualização ampliada</span><h3 id="figure-lightbox-title">{selected.label}</h3></div>
-              <button ref={closeRef} type="button" onClick={closePreview}>Fechar</button>
+              <div><span>Visualização ampliada</span><h2 ref={lightboxTitleRef} id={lightboxTitleId} tabIndex="-1">{selected.label}</h2></div>
+              <button ref={closeRef} type="button" aria-label="Fechar figura ampliada" onClick={closePreview}>Fechar</button>
             </header>
             <div className="figure-lightbox__viewport">
               <img src={source} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" />
             </div>
-          </div>
-        </div>
+          </section>
+        </div>,
+        document.body,
       )}
     </>
   );
@@ -111,12 +140,12 @@ function ImportScreen({ onContinue }) {
       <fieldset className="processing-options">
         <legend>Onde executar a análise</legend>
         <div>
-          <label className={processing === "local" ? "is-selected" : ""}>
-            <input type="radio" name="processing" value="local" checked={processing === "local"} onChange={() => setProcessing("local")} />
+          <label htmlFor="processing-local" aria-label="Processar no dispositivo" className={processing === "local" ? "is-selected" : ""}>
+            <input id="processing-local" type="radio" name="processing" value="local" checked={processing === "local"} onChange={() => setProcessing("local")} />
             <span><strong>No dispositivo</strong><small>O modelo processa o documento localmente e mantém o arquivo no computador.</small></span>
           </label>
-          <label className={processing === "cloud" ? "is-selected" : ""}>
-            <input type="radio" name="processing" value="cloud" checked={processing === "cloud"} onChange={() => setProcessing("cloud")} />
+          <label htmlFor="processing-cloud" aria-label="Processar na nuvem" className={processing === "cloud" ? "is-selected" : ""}>
+            <input id="processing-cloud" type="radio" name="processing" value="cloud" checked={processing === "cloud"} onChange={() => setProcessing("cloud")} />
             <span><strong>Na nuvem</strong><small>Usa modelos mais completos para OCR e descrições, mas requer conexão.</small></span>
           </label>
         </div>
@@ -139,7 +168,7 @@ function DocumentPanel({ selected }) {
         <div><h3 id="document-panel-title">Documento original</h3><span aria-live="polite">Selecionado: {selected.label}</span></div>
         <div className="document-zoom" aria-label="Controles de zoom">
           <button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(40, value - 10))}>−</button>
-          <span>{zoom}%</span>
+          <output aria-live="polite" aria-atomic="true" aria-label={`Zoom atual: ${zoom}%`}>{zoom}%</output>
           <button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(130, value + 10))}>+</button>
           <button type="button" onClick={() => setZoom(68)}>Página inteira</button>
         </div>
@@ -169,7 +198,10 @@ function StructurePanel({ selectedId, onSelect }) {
       </nav>
       <div className="structure-validation">
         <strong>Validação prevista</strong>
-        <p><a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> para acessibilidade e <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a> para conformidade técnica.</p>
+        <p>
+          <a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY<span className="sr-only"> (abre em nova aba)</span></a> para acessibilidade e{" "}
+          <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck<span className="sr-only"> (abre em nova aba)</span></a> para conformidade técnica.
+        </p>
       </div>
     </aside>
   );
@@ -189,7 +221,7 @@ function StructureBranch({ parentId, selectedId, onSelect, root = false }) {
             <button
               className={`structure-node${selectedId === node.id ? " is-selected" : ""}`}
               type="button"
-              aria-pressed={selectedId === node.id}
+              aria-current={selectedId === node.id ? "true" : undefined}
               onClick={() => onSelect(node.id)}
             >
               <span className="tree-order">{order}</span>
@@ -214,7 +246,7 @@ function ElementPreview({ selected }) {
       </header>
 
       {selected.type === "figure" && <FigurePreview selected={selected} />}
-      {selected.type === "formula" && <div className="element-preview__formula"><span>√2 ≈ 1,4142136</span><small>Representação matemática reconhecida</small></div>}
+      {selected.type === "formula" && <div className="element-preview__formula" role="img" aria-label="Raiz quadrada de 2 é aproximadamente 1 vírgula 4142136"><span aria-hidden="true">√2 ≈ 1,4142136</span><small>Representação matemática reconhecida</small></div>}
       {["heading", "note"].includes(selected.type) && <blockquote>{selected.label}</blockquote>}
     </section>
   );
@@ -231,7 +263,7 @@ function AiSuggestion({ selected, onApply }) {
           <strong id={titleId}>Sugestão da IA</strong>
           <span>Assistente de revisão</span>
         </div>
-        <span className="ai-review-card__confidence">{suggestion.confidence}%</span>
+        <span className="ai-review-card__confidence" aria-label={`Confiança estimada: ${suggestion.confidence}%`}>{suggestion.confidence}%</span>
       </header>
       <p className="ai-review-card__reason">{suggestion.text}</p>
       <div className="ai-review-card__proposal">
@@ -246,7 +278,7 @@ function AiSuggestion({ selected, onApply }) {
   );
 }
 
-function InspectorPanel({ selected, altText, setAltText, onMessage }) {
+function InspectorPanel({ selected, altText, setAltText, onMessage, headingRef }) {
   const applySuggestion = () => {
     if (selected.type === "figure") {
       setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento.");
@@ -256,12 +288,15 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
 
   return (
     <aside className="workspace-panel inspector-panel" aria-labelledby="inspector-panel-title">
-      <header><h3 id="inspector-panel-title">Revisar elemento</h3><span>{getTypeName(selected)}</span></header>
+      <header><h3 ref={headingRef} id="inspector-panel-title" tabIndex="-1">Revisar elemento</h3><span>{getTypeName(selected)}</span></header>
       <ElementPreview selected={selected} />
       <div className="inspector-form">
         <AiSuggestion selected={selected} onApply={applySuggestion} />
         <label>Tipo de elemento<input value={getTypeName(selected)} readOnly /></label>
-        <label>Ordem de leitura<div className="order-input"><button type="button" aria-label="Mover para trás">−</button><input value={nodes.findIndex((node) => node.id === selected.id) + 1} readOnly aria-label="Posição na ordem de leitura" /><button type="button" aria-label="Mover para frente">+</button></div></label>
+        <fieldset className="inspector-fieldset">
+          <legend>Ordem de leitura</legend>
+          <div className="order-input"><button type="button" aria-label="Mover para trás">−</button><input value={nodes.findIndex((node) => node.id === selected.id) + 1} readOnly aria-label="Posição na ordem de leitura" /><button type="button" aria-label="Mover para frente">+</button></div>
+        </fieldset>
 
         {selected.type === "figure" && <>
           <label>Texto alternativo<textarea value={altText} onChange={(event) => setAltText(event.target.value)} rows="4" /></label>
@@ -287,7 +322,23 @@ function WorkspaceScreen({ onChangeFile }) {
   const [mobileTab, setMobileTab] = useState("document");
   const [altText, setAltText] = useState("");
   const [message, setMessage] = useState("");
+  const inspectorHeadingRef = useRef(null);
+  const shouldFocusInspector = useRef(false);
   const selected = useMemo(() => nodes.find((node) => node.id === selectedId) ?? nodes[0], [selectedId]);
+
+  useEffect(() => {
+    if (!shouldFocusInspector.current || mobileTab !== "inspector") return;
+    shouldFocusInspector.current = false;
+    inspectorHeadingRef.current?.focus();
+  }, [mobileTab, selectedId]);
+
+  const selectNode = (id) => {
+    setSelectedId(id);
+    if (window.matchMedia("(max-width: 1100px)").matches) {
+      shouldFocusInspector.current = true;
+      setMobileTab("inspector");
+    }
+  };
 
   return (
     <section className="prototype-workspace">
@@ -296,17 +347,17 @@ function WorkspaceScreen({ onChangeFile }) {
         <button className="workspace-change-file" type="button" onClick={onChangeFile}>Trocar arquivo</button>
       </div>
       <div className={`workspace-grid mobile-tab-${mobileTab}`}>
-        <StructurePanel selectedId={selectedId} onSelect={(id) => { setSelectedId(id); setMobileTab("inspector"); }} />
+        <StructurePanel selectedId={selectedId} onSelect={selectNode} />
         <DocumentPanel selected={selected} />
-        <InspectorPanel selected={selected} altText={altText} setAltText={setAltText} onMessage={setMessage} />
+        <InspectorPanel selected={selected} altText={altText} setAltText={setAltText} onMessage={setMessage} headingRef={inspectorHeadingRef} />
       </div>
-      <nav className="workspace-mobile-tabs" aria-label="Painéis do espaço de trabalho">
+      <div className="workspace-mobile-tabs" role="group" aria-label="Painéis do espaço de trabalho">
         <button className={mobileTab === "structure" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "structure"} onClick={() => setMobileTab("structure")}>Estrutura</button>
         <button className={mobileTab === "document" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "document"} onClick={() => setMobileTab("document")}>Documento</button>
         <button className={mobileTab === "inspector" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "inspector"} onClick={() => setMobileTab("inspector")}>Revisão</button>
-      </nav>
+      </div>
       <footer className="workspace-actions">
-        <span aria-live="polite">{message || "A IA montou uma primeira versão. Revise as sugestões antes de exportar."}</span>
+        <span role="status" aria-live="polite" aria-atomic="true">{message || "A IA montou uma primeira versão. Revise as sugestões antes de exportar."}</span>
         <button type="button" onClick={() => setMessage("A leitura em voz alta seria iniciada aqui.")}>Ouvir prévia</button>
         <button className="workspace-export" type="button" onClick={() => setMessage("Revise os três itens pendentes antes de exportar.")}>Exportar EPUB</button>
       </footer>

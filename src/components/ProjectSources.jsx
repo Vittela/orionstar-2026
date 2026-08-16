@@ -29,7 +29,9 @@ export function ProjectSources() {
             <ul>
               {group.sources.map((source) => (
                 <li key={source.url}>
-                  <a href={source.url} target="_blank" rel="noreferrer">{source.shortLabel}</a>
+                  <a href={source.url} target="_blank" rel="noreferrer">
+                    {source.shortLabel}<span className="sr-only"> (abre em nova aba)</span>
+                  </a>
                 </li>
               ))}
             </ul>

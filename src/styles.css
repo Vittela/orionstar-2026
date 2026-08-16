@@ -21,7 +21,7 @@
   border: 0;
 }
 
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+body { margin: 0; min-width: 0; min-height: 100vh; }
 button { font: inherit; }
 
 .site-shell {
@@ -204,8 +204,20 @@ button { font: inherit; }
   background: rgba(25, 23, 27, 0.72);
 }
 
+.modal-backdrop-dismiss {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: default;
+}
+
 .artifact-modal {
   position: relative;
+  z-index: 1;
   display: grid;
   width: min(1720px, 100%);
   height: min(980px, 100%);
@@ -709,9 +721,9 @@ button { font: inherit; }
 .markdown-render a { color: #285a73; }
 
 .epub-embedded-viewer { display: grid; height: 100%; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
-.epub-embedded-viewer nav { display: flex; gap: 3px; padding: 5px; background: #eceeec; border-bottom: 1px solid #c1c5c3; }
-.epub-embedded-viewer nav button { display: flex; align-items: center; gap: 5px; padding: 6px 9px; color: #626a6d; background: transparent; border: 1px solid transparent; border-radius: 2px; font-size: 0.55rem; cursor: pointer; }
-.epub-embedded-viewer nav button.is-active { color: #263e38; background: #fff; border-color: #b4bab7; font-weight: 700; }
+.epub-embedded-viewer__controls { display: flex; gap: 3px; padding: 5px; background: #eceeec; border-bottom: 1px solid #c1c5c3; }
+.epub-embedded-viewer__controls button { display: flex; align-items: center; gap: 5px; padding: 6px 9px; color: #626a6d; background: transparent; border: 1px solid transparent; border-radius: 2px; font-size: 0.55rem; cursor: pointer; }
+.epub-embedded-viewer__controls button.is-active { color: #263e38; background: #fff; border-color: #b4bab7; font-weight: 700; }
 .epub-embedded-viewer iframe { width: 100%; height: 100%; background: #fff; border: 0; }
 
 .comparison-analysis { max-width: 1480px; margin: 34px auto 0; }
@@ -946,10 +958,10 @@ button { font: inherit; }
 .figure-preview__trigger span { position: absolute; right: 8px; bottom: 8px; padding: 5px 7px; color: #fff; background: rgba(48, 45, 51, 0.86); border-radius: 4px; font-size: 0.64rem; font-weight: 700; }
 .figure-preview figcaption { margin-top: 6px; color: #77717b; font-size: 0.62rem; line-height: 1.4; }
 .figure-lightbox { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(31, 29, 33, 0.74); }
-.figure-lightbox__dialog { display: grid; width: min(960px, 100%); height: min(760px, 100%); grid-template-rows: auto minmax(0, 1fr); overflow: hidden; background: #fff; border: 1px solid #bdb8c0; border-radius: 10px; box-shadow: 0 18px 55px rgba(24, 22, 26, 0.28); }
+.figure-lightbox__dialog { position: relative; z-index: 1; display: grid; width: min(960px, 100%); height: min(760px, 100%); grid-template-rows: auto minmax(0, 1fr); overflow: hidden; background: #fff; border: 1px solid #817a84; border-radius: 10px; box-shadow: 0 18px 55px rgba(24, 22, 26, 0.28); }
 .figure-lightbox__dialog > header { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 18px; padding: 10px 14px; border-bottom: 1px solid #d2ced5; }
 .figure-lightbox__dialog > header span { display: block; color: #77717b; font-size: 0.66rem; }
-.figure-lightbox__dialog > header h3 { margin: 2px 0 0; color: #302d33; font-size: 0.94rem; }
+.figure-lightbox__dialog > header h2 { margin: 2px 0 0; color: #302d33; font-size: 0.94rem; }
 .figure-lightbox__dialog > header button { padding: 7px 10px; color: #403b43; background: #fff; border: 1px solid #aaa4ac; border-radius: 5px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
 .figure-lightbox__viewport { display: grid; min-height: 0; place-items: center; overflow: auto; padding: clamp(18px, 4vw, 46px); background: #f4f2ed; }
 .figure-lightbox__viewport img { display: block; width: min(100%, 760px); max-height: 100%; object-fit: contain; }
@@ -1021,9 +1033,9 @@ button { font: inherit; }
 .research-viewer__status { font-size: 0.76rem; }
 .markdown-render { padding: 24px 26px 44px; color: #302d33; font-family: inherit; font-size: 0.82rem; line-height: 1.65; }
 .markdown-render > p:first-child { padding-bottom: 0; border-bottom: 0; font-size: 0.82rem; font-weight: 400; letter-spacing: 0; }
-.epub-embedded-viewer nav { padding: 6px; background: #f1efeb; border-color: #d7d2d8; }
-.epub-embedded-viewer nav button { padding: 7px 10px; color: #625d66; border-radius: 5px; font-size: 0.7rem; }
-.epub-embedded-viewer nav button.is-active { color: #493ca7; border-color: #bdb7c0; }
+.epub-embedded-viewer__controls { padding: 6px; background: #f1efeb; border-color: #d7d2d8; }
+.epub-embedded-viewer__controls button { padding: 7px 10px; color: #625d66; border-radius: 5px; font-size: 0.7rem; }
+.epub-embedded-viewer__controls button.is-active { color: #493ca7; border-color: #817a84; }
 .comparison-analysis { max-width: 1100px; margin-top: 36px; }
 .comparison-analysis > h3,
 .comparison-conclusion h3 { margin: 0 0 12px; color: #302d33; font-size: 1.15rem; }
@@ -1088,4 +1100,208 @@ textarea:focus-visible { outline: 3px solid #6d5bd0; outline-offset: 2px; }
   .academic-comparison { padding: 20px 10px 36px; }
   .comparison-lead { font-size: 0.86rem; }
   .markdown-render { padding: 20px 18px 40px; }
+}
+
+/* Accessibility safeguards */
+.skip-link {
+  position: fixed;
+  z-index: 200;
+  top: 10px;
+  left: 10px;
+  padding: 11px 14px;
+  color: #fff;
+  background: #302d33;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus { transform: translateY(0); }
+.site-main:focus { outline: none; }
+.artifact-modal__content { overscroll-behavior: contain; }
+.artifact-modal__header h2:focus,
+.figure-lightbox__dialog h2:focus { outline: 3px solid #6d5bd0; outline-offset: 4px; }
+
+.source-groups a {
+  min-height: 24px;
+  color: #493ca7;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.research-panel > header > a {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 5px 7px;
+}
+
+.excalidraw-viewer .main-menu-trigger,
+.excalidraw-viewer .disable-zen-mode { display: none !important; }
+
+.viewer-transcript {
+  position: absolute;
+  z-index: 6;
+  top: 12px;
+  left: 14px;
+  width: min(360px, calc(100% - 300px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  color: #302d33;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #817a84;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(36, 35, 38, 0.12);
+}
+
+.viewer-transcript summary {
+  min-height: 40px;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.viewer-transcript ol { margin: 0; padding: 4px 22px 14px 34px; }
+.viewer-transcript li { padding-left: 3px; font-size: 0.76rem; line-height: 1.5; }
+.viewer-transcript li + li { margin-top: 6px; }
+
+.product-prototype { min-width: 0; }
+.document-zoom button,
+.document-zoom output {
+  min-width: 36px;
+  min-height: 32px;
+  padding: 6px 8px;
+  color: #4f4952;
+  background: #f7f5f1;
+  border: 1px solid #817a84;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.document-zoom output { display: inline-flex; align-items: center; justify-content: center; }
+.workspace-change-file,
+.figure-preview__trigger,
+.inspector-form textarea,
+.inspector-form select,
+.inspector-form input,
+.order-input button { border-color: #817a84; }
+
+.inspector-fieldset {
+  margin: 0 0 11px;
+  padding: 0;
+  border: 0;
+}
+
+.inspector-fieldset legend {
+  margin-bottom: 4px;
+  color: #4f4952;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.product-prototype button,
+.product-prototype input,
+.product-prototype select,
+.product-prototype textarea,
+.comparison-mobile-tabs button,
+.epub-embedded-viewer__controls button { min-height: 36px; }
+
+.workspace-panel > header h3 { font-size: 0.86rem; }
+.workspace-panel > header span,
+.workspace-context div span,
+.workspace-context > span,
+.structure-summary,
+.tree-order,
+.tree-node-label small,
+.status-label,
+.structure-validation,
+.element-preview > header span:first-child,
+.figure-preview figcaption,
+.ai-review-card__header > div span,
+.ai-review-card__confidence,
+.ai-review-card__reason,
+.ai-review-card__proposal span,
+.ai-review-card__proposal strong,
+.ai-review-card__proposal button,
+.ai-review-card__note,
+.inspector-form > label,
+.inspector-form textarea,
+.inspector-form select,
+.inspector-form input,
+.workspace-actions > span,
+.workspace-actions button,
+.research-panel > header p,
+.research-panel > header > a,
+.research-viewer__status,
+.epub-embedded-viewer__controls button { font-size: 0.75rem; }
+
+.tree-node-label strong { font-size: 0.8rem; }
+.element-preview h4 { font-size: 0.88rem; }
+.ai-review-card__header strong { font-size: 0.8rem; }
+.status-label,
+.tree-node-label small,
+.element-preview > header span:first-child,
+.figure-preview figcaption,
+.ai-review-card__header > div span,
+.ai-review-card__proposal span,
+.ai-review-card__note { color: #6f6973; }
+
+.workspace-actions { flex-wrap: wrap; }
+.workspace-actions > span {
+  overflow: visible;
+  white-space: normal;
+  line-height: 1.45;
+  text-overflow: clip;
+}
+
+.workspace-actions button { min-height: 38px; }
+.figure-lightbox__dialog > header button { min-height: 40px; }
+
+@media (max-width: 620px) {
+  .artifact-modal-backdrop,
+  .figure-lightbox { padding: 8px; }
+  .viewer-helper { display: none; }
+  .viewer-transcript {
+    top: 60px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100% - 72px);
+  }
+  .document-canvas { padding: 12px; }
+  .document-page { min-width: 0; }
+  .workspace-mobile-tabs button { min-height: 48px; font-size: 0.75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .artifact-card:hover { transform: none; }
+}
+
+@media (forced-colors: active) {
+  .artifact-card,
+  .status-label,
+  .structure-node.is-selected,
+  .workspace-mobile-tabs button.is-active,
+  .comparison-mobile-tabs button.is-active,
+  .epub-embedded-viewer__controls button.is-active { border: 2px solid ButtonText; }
+  .structure-node.is-selected,
+  .workspace-mobile-tabs button.is-active,
+  .comparison-mobile-tabs button.is-active,
+  .epub-embedded-viewer__controls button.is-active { outline: 2px solid Highlight; outline-offset: -4px; }
 }
