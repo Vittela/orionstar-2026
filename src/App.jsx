@@ -1,11 +1,8 @@
 import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
 import { ArtifactModal } from "./components/ArtifactModal";
-import { ComparisonPreview } from "./components/ComparisonPreview";
-import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
 import { ProductInterfaceMockup } from "./components/ProductInterfaceMockup";
-import { ProductInterfacePreview } from "./components/ProductInterfacePreview";
 import { ProjectSources } from "./components/ProjectSources";
 
 const ExcalidrawViewer = lazy(() =>
@@ -16,6 +13,8 @@ const AccessibilityComparison = lazy(() =>
   import("./components/AccessibilityComparison").then((module) => ({ default: module.AccessibilityComparison })),
 );
 
+const previewPath = (file) => `${import.meta.env.BASE_URL}previews/${file}`;
+
 const artifacts = [
   {
     id: "flow",
@@ -23,7 +22,7 @@ const artifacts = [
     title: "Fluxo do sistema",
     description: "Da captura digital à publicação acessível.",
     accent: "#6d5bd0",
-    preview: <FlowPreview />,
+    preview: <img className="artifact-preview-image artifact-preview-image--flow" src={previewPath("fluxo.svg")} alt="" />,
   },
   {
     id: "mockup",
@@ -31,7 +30,7 @@ const artifacts = [
     title: "Conversor acessível",
     description: "Mockup navegável do fluxo de importação, revisão e conformidade.",
     accent: "#e07a5f",
-    preview: <ProductInterfacePreview />,
+    preview: <img className="artifact-preview-image artifact-preview-image--interface" src={previewPath("interface.svg")} alt="" />,
   },
   {
     id: "comparison",
@@ -39,7 +38,7 @@ const artifacts = [
     title: "Comparativo de formatos",
     description: "Imagem, Markdown do OCR e EPUB reconstruído sob análise.",
     accent: "#3a8d73",
-    preview: <ComparisonPreview />,
+    preview: <img className="artifact-preview-image artifact-preview-image--comparison" src={previewPath("comparativo.svg")} alt="" />,
   },
 ];
 
