@@ -131,7 +131,7 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
         <label>Ordem de leitura<div className="order-input"><button type="button">−</button><input value={nodes.findIndex((node) => node.id === selected.id) + 1} readOnly /><button type="button">+</button></div></label>
 
         {selected.type === "figure" && <>
-          <div className="inspector-figure"><img src={`${import.meta.env.BASE_URL}reader/EPUB/images/figura-1-1-circunferencia.png`} alt="Prévia da figura selecionada" /></div>
+          <div className="inspector-figure"><img src={`${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`} alt="Prévia da figura selecionada" /></div>
           <label>Texto alternativo<textarea value={altText} onChange={(event) => setAltText(event.target.value)} rows="4" /></label>
           <label>Descrição longa<textarea placeholder="Descreva relações, dados e contexto visual…" rows="3" /></label>
           <button className="ai-suggestion" type="button" onClick={() => { setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento."); onMessage("Sugestão inserida como rascunho; a revisão humana continua obrigatória."); }}><Sparkles size={14} />Sugerir com IA</button>

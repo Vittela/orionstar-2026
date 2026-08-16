@@ -1,7 +1,6 @@
 import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
 import { ArtifactModal } from "./components/ArtifactModal";
-import { AccessibilityComparison } from "./components/AccessibilityComparison";
 import { ComparisonPreview } from "./components/ComparisonPreview";
 import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
@@ -10,6 +9,10 @@ import { ProductInterfacePreview } from "./components/ProductInterfacePreview";
 
 const ExcalidrawViewer = lazy(() =>
   import("./components/ExcalidrawViewer").then((module) => ({ default: module.ExcalidrawViewer })),
+);
+
+const AccessibilityComparison = lazy(() =>
+  import("./components/AccessibilityComparison").then((module) => ({ default: module.AccessibilityComparison })),
 );
 
 const artifacts = [
@@ -33,7 +36,7 @@ const artifacts = [
     id: "comparison",
     eyebrow: "03 · Evidências",
     title: "Comparativo de formatos",
-    description: "Imagem, PDF com OCR e EPUB acessível lado a lado.",
+    description: "Imagem, Markdown do OCR e EPUB reconstruído sob análise.",
     accent: "#3a8d73",
     preview: <ComparisonPreview />,
   },
@@ -72,7 +75,9 @@ export default function App() {
 
       {selectedArtifact === "comparison" && (
         <ArtifactModal eyebrow="03 · Evidências" title="Comparativo de formatos" onClose={closeArtifact}>
-          <AccessibilityComparison />
+          <Suspense fallback={<div className="viewer-status"><span className="viewer-spinner" aria-hidden="true" /><strong>Preparando o comparativo…</strong></div>}>
+            <AccessibilityComparison />
+          </Suspense>
         </ArtifactModal>
       )}
 
