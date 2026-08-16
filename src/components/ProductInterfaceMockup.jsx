@@ -224,7 +224,7 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
   );
 }
 
-function WorkspaceScreen() {
+function WorkspaceScreen({ onChangeFile }) {
   const [selectedId, setSelectedId] = useState("figure");
   const [mobileTab, setMobileTab] = useState("document");
   const [altText, setAltText] = useState("");
@@ -233,7 +233,10 @@ function WorkspaceScreen() {
 
   return (
     <section className="prototype-workspace">
-      <div className="workspace-context"><div><strong>capitulo-numeros-reais.pdf</strong><span>1 página · modelo executado no dispositivo</span></div><span>Análise concluída</span></div>
+      <div className="workspace-context">
+        <div><strong>capitulo-numeros-reais.pdf</strong><span>1 página · análise concluída</span></div>
+        <button className="workspace-change-file" type="button" onClick={onChangeFile}>Trocar arquivo</button>
+      </div>
       <div className={`workspace-grid mobile-tab-${mobileTab}`}>
         <StructurePanel selectedId={selectedId} onSelect={(id) => { setSelectedId(id); setMobileTab("inspector"); }} />
         <DocumentPanel selected={selected} />
@@ -258,15 +261,7 @@ export function ProductInterfaceMockup() {
 
   return (
     <div className="product-prototype">
-      <header className="prototype-header">
-        <div className="prototype-brand"><strong>Conversor acessível</strong><span>Revisão assistida por IA</span></div>
-        <nav aria-label="Etapas do processo">
-          <button className={screen === "import" ? "is-current" : ""} type="button" aria-pressed={screen === "import"} onClick={() => setScreen("import")}>1. Enviar arquivo</button>
-          <button className={screen === "workspace" ? "is-current" : ""} type="button" aria-pressed={screen === "workspace"} onClick={() => setScreen("workspace")}>2. Revisar sugestões</button>
-        </nav>
-        <span className="prototype-mode">Modelo local</span>
-      </header>
-      {screen === "import" ? <ImportScreen onContinue={() => setScreen("workspace")} /> : <WorkspaceScreen />}
+      {screen === "import" ? <ImportScreen onContinue={() => setScreen("workspace")} /> : <WorkspaceScreen onChangeFile={() => setScreen("import")} />}
     </div>
   );
 }
