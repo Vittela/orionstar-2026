@@ -1,3 +1,6 @@
+import { ExternalLink } from "lucide-react";
+import { SOURCES } from "../data/sources";
+
 export function Header() {
   return (
     <header className="project-header">
@@ -19,6 +22,15 @@ export function Header() {
       <p className="project-header__author">
         Projeto de <strong>João Victor Correia de Araujo da Silva</strong>
       </p>
+
+      <nav className="project-header__references" aria-label="Base normativa do projeto">
+        <span>Base normativa</span>
+        {[SOURCES.lbi, SOURCES.epubAccessibility, SOURCES.wcag, SOURCES.mathml].map((source) => (
+          <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
+            {source.shortLabel}<ExternalLink size={11} aria-hidden="true" />
+          </a>
+        ))}
+      </nav>
     </header>
   );
 }

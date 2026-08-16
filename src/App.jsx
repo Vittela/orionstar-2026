@@ -6,6 +6,7 @@ import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
 import { ProductInterfaceMockup } from "./components/ProductInterfaceMockup";
 import { ProductInterfacePreview } from "./components/ProductInterfacePreview";
+import { ProjectSources } from "./components/ProjectSources";
 
 const ExcalidrawViewer = lazy(() =>
   import("./components/ExcalidrawViewer").then((module) => ({ default: module.ExcalidrawViewer })),
@@ -64,6 +65,8 @@ export default function App() {
           ))}
         </div>
       </section>
+
+      <ProjectSources />
 
       {selectedArtifact === "flow" && (
         <ArtifactModal eyebrow="01 · Processo" title="Fluxo do sistema" onClose={closeArtifact}>
