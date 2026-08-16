@@ -52,11 +52,9 @@ export default function App() {
       <Header />
       <section className="artifact-section" aria-labelledby="artifacts-title">
         <div className="section-heading">
-          <div>
-            <p className="section-kicker">Artefatos do projeto</p>
-            <h2 id="artifacts-title">Explore o processo, o resultado e as evidências</h2>
-          </div>
-          <p>Selecione um artefato para abrir a visualização completa.</p>
+          <p className="section-kicker">Artefatos do projeto</p>
+          <h2 id="artifacts-title">Três partes de um mesmo processo</h2>
+          <p>Abra cada artefato para consultar o fluxo, testar o mockup da interface e comparar os arquivos produzidos.</p>
         </div>
 
         <div className="artifact-grid">
