@@ -2,16 +2,16 @@ import { useMemo, useState } from "react";
 import { SOURCES } from "../data/sources";
 
 const nodes = [
-  { id: "chapter", label: "Capítulo 1 · Números reais", type: "heading", level: 0, status: "ok" },
-  { id: "note", label: "Nota sobre raízes", type: "note", level: 1, status: "ok" },
-  { id: "intro", label: "Irracionais populares", type: "heading", level: 1, status: "ok" },
-  { id: "formula", label: "Fórmula · aproximações", type: "formula", level: 2, status: "pending" },
-  { id: "example", label: "Exemplo 1 · O número π", type: "heading", level: 1, status: "ok" },
-  { id: "figure", label: "Figura 1.1 · Circunferência", type: "figure", level: 2, status: "pending" },
-  { id: "table", label: "Tabela de propriedades", type: "table", level: 2, status: "error" },
+  { id: "chapter", parentId: null, label: "Capítulo 1 · Números reais", type: "heading", level: 0, status: "ok", region: { left: "67%", top: "2%", width: "29%", height: "4%" } },
+  { id: "note", parentId: "chapter", label: "Nota sobre raízes", type: "note", level: 1, status: "ok", region: { left: "4%", top: "7%", width: "33%", height: "7%" } },
+  { id: "intro", parentId: "chapter", label: "Irracionais populares", type: "heading", level: 1, status: "ok", region: { left: "38%", top: "6%", width: "58%", height: "10%" } },
+  { id: "formula", parentId: "intro", label: "Fórmula · aproximações", type: "formula", level: 2, status: "pending", region: { left: "48%", top: "8%", width: "47%", height: "8%" } },
+  { id: "example", parentId: "chapter", label: "Exemplo 1 · O número π", type: "heading", level: 1, status: "ok", region: { left: "38%", top: "16%", width: "58%", height: "33%" } },
+  { id: "figure", parentId: "example", label: "Figura 1.1 · Circunferência", type: "figure", level: 2, status: "pending", region: { left: "56%", top: "27%", width: "33%", height: "22%" } },
+  { id: "example-two", parentId: "chapter", label: "Exemplo 2 · Diagonal do quadrado", type: "heading", level: 1, status: "pending", region: { left: "38%", top: "50%", width: "58%", height: "19%" } },
 ];
 
-const typeNames = { heading: "Título", note: "Nota", formula: "Fórmula", figure: "Figura", table: "Tabela" };
+const typeNames = { heading: "Título", note: "Nota", formula: "Fórmula", figure: "Figura" };
 const statusNames = { ok: "Confirmado", pending: "Revisar", error: "Corrigir" };
 
 const aiSuggestions = {
@@ -21,7 +21,7 @@ const aiSuggestions = {
   formula: { confidence: 96, text: "A expressão foi reconhecida, mas a forma de leitura ainda precisa ser conferida.", action: "Usar a descrição sugerida" },
   example: { confidence: 94, text: "O rótulo e a posição indicam um exemplo dentro da seção atual.", action: "Manter como título H2" },
   figure: { confidence: 92, text: "A imagem mostra uma circunferência com o diâmetro destacado. A descrição precisa ser confirmada antes da exportação.", action: "Usar o texto alternativo sugerido" },
-  table: { confidence: 71, text: "O conteúdo parece tabular, mas os cabeçalhos não puderam ser identificados com segurança.", action: "Marcar a primeira linha como cabeçalho" },
+  "example-two": { confidence: 89, text: "O destaque tipográfico indica o início de um segundo exemplo dentro do capítulo.", action: "Manter como título H2" },
 };
 
 function getTypeName(node) {
@@ -73,24 +73,25 @@ function ImportScreen({ onContinue }) {
 }
 
 function DocumentPanel({ selected }) {
-  const [zoom, setZoom] = useState(86);
+  const [zoom, setZoom] = useState(68);
 
   return (
     <section className="workspace-panel document-panel" aria-labelledby="document-panel-title">
       <header className="document-toolbar">
         <div><h3 id="document-panel-title">Documento original</h3><span aria-live="polite">Selecionado: {selected.label}</span></div>
         <div className="document-zoom" aria-label="Controles de zoom">
-          <button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(60, value - 10))}>−</button>
+          <button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(40, value - 10))}>−</button>
           <span>{zoom}%</span>
-          <button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(120, value + 10))}>+</button>
-          <button type="button" onClick={() => setZoom(86)}>Ajustar</button>
+          <button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(130, value + 10))}>+</button>
+          <button type="button" onClick={() => setZoom(68)}>Página inteira</button>
         </div>
       </header>
       <div className="document-canvas">
         <div className="document-page" style={{ "--document-width": `${zoom}%` }}>
           <img src={`${import.meta.env.BASE_URL}artifacts/captura-de-livro.png`} alt="Página original sobre números reais" />
-          <span className={`document-highlight document-highlight--${selected.type}`} aria-hidden="true" />
-          {selected.status !== "ok" && <span className="document-warning">{selected.type === "figure" ? "Figura sem texto alternativo" : "Elemento para revisar"}</span>}
+          <span className="document-highlight" style={selected.region} aria-hidden="true">
+            {selected.status !== "ok" && <span className="document-warning">{selected.type === "figure" ? "Figura sem texto alternativo" : "Elemento para revisar"}</span>}
+          </span>
         </div>
       </div>
     </section>
@@ -106,26 +107,42 @@ function StructurePanel({ selectedId, onSelect }) {
       <header><h3 id="structure-panel-title">Estrutura sugerida</h3><span>{nodes.length} elementos</span></header>
       <div className="structure-summary"><strong>{verified} confirmadas</strong><span>{needsReview} para revisar</span></div>
       <nav className="structure-tree" aria-label="Estrutura sugerida e ordem de leitura">
-        {nodes.map((node, index) => (
-          <button
-            key={node.id}
-            className={`tree-level-${node.level}${selectedId === node.id ? " is-selected" : ""}`}
-            type="button"
-            aria-pressed={selectedId === node.id}
-            onClick={() => onSelect(node.id)}
-            style={{ "--tree-level": node.level }}
-          >
-            <span className="tree-order">{index + 1}</span>
-            <span className="tree-node-label"><strong>{node.label}</strong><small>{getTypeName(node)}</small></span>
-            <StatusLabel status={node.status} />
-          </button>
-        ))}
+        <StructureBranch parentId={null} selectedId={selectedId} onSelect={onSelect} root />
       </nav>
       <div className="structure-validation">
         <strong>Validação prevista</strong>
         <p><a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> para acessibilidade e <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a> para conformidade técnica.</p>
       </div>
     </aside>
+  );
+}
+
+function StructureBranch({ parentId, selectedId, onSelect, root = false }) {
+  const branch = nodes.filter((node) => node.parentId === parentId);
+
+  return (
+    <ol className={root ? "structure-tree__root" : "structure-tree__children"}>
+      {branch.map((node) => {
+        const order = nodes.findIndex((item) => item.id === node.id) + 1;
+        const hasChildren = nodes.some((item) => item.parentId === node.id);
+
+        return (
+          <li className="structure-tree__item" key={node.id}>
+            <button
+              className={`structure-node${selectedId === node.id ? " is-selected" : ""}`}
+              type="button"
+              aria-pressed={selectedId === node.id}
+              onClick={() => onSelect(node.id)}
+            >
+              <span className="tree-order">{order}</span>
+              <span className="tree-node-label"><strong>{node.label}</strong><small>{getTypeName(node)}</small></span>
+              <StatusLabel status={node.status} />
+            </button>
+            {hasChildren && <StructureBranch parentId={node.id} selectedId={selectedId} onSelect={onSelect} />}
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -140,7 +157,6 @@ function ElementPreview({ selected }) {
 
       {selected.type === "figure" && <div className="element-preview__figure"><img src={`${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" /></div>}
       {selected.type === "formula" && <div className="element-preview__formula"><span>√2 ≈ 1,4142136</span><small>Representação matemática reconhecida</small></div>}
-      {selected.type === "table" && <p className="element-preview__message"><strong>Cabeçalhos ausentes.</strong> A estrutura da tabela precisa ser definida.</p>}
       {["heading", "note"].includes(selected.type) && <blockquote>{selected.label}</blockquote>}
     </section>
   );
@@ -151,23 +167,23 @@ function AiSuggestion({ selected, onApply }) {
   const titleId = `ai-suggestion-title-${selected.id}`;
 
   return (
-    <section className="ai-suggestion" aria-labelledby={titleId}>
-      <header className="ai-suggestion__header">
+    <section className="ai-review-card" aria-labelledby={titleId}>
+      <header className="ai-review-card__header">
         <div>
           <strong id={titleId}>Sugestão da IA</strong>
           <span>Assistente de revisão</span>
         </div>
-        <span className="ai-suggestion__confidence">{suggestion.confidence}%</span>
+        <span className="ai-review-card__confidence">{suggestion.confidence}%</span>
       </header>
-      <p className="ai-suggestion__reason">{suggestion.text}</p>
-      <div className="ai-suggestion__proposal">
+      <p className="ai-review-card__reason">{suggestion.text}</p>
+      <div className="ai-review-card__proposal">
         <div>
           <span>Proposta</span>
           <strong>{suggestion.action}</strong>
         </div>
         <button type="button" onClick={onApply} aria-label={`Aplicar sugestão: ${suggestion.action}`}>Aplicar</button>
       </div>
-      <small className="ai-suggestion__note">Confira o resultado antes de continuar.</small>
+      <small className="ai-review-card__note">Confira o resultado antes de continuar.</small>
     </section>
   );
 }
@@ -196,11 +212,6 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
 
         {selected.type === "formula" && <>
           <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="5" /></label>
-        </>}
-
-        {selected.type === "table" && <>
-          <label>Cabeçalhos de coluna<select defaultValue="first-row"><option value="first-row">Usar primeira linha</option></select></label>
-          <label>Cabeçalhos de linha<select defaultValue="undefined"><option value="undefined">Não definido</option></select></label>
         </>}
 
         {["heading", "note"].includes(selected.type) && <>
