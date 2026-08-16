@@ -74,6 +74,9 @@ export function AccessibilityComparison() {
       <p className="comparison-lead">
         Abaixo, é possível conferir a página digitalizada, o texto gerado pelo Mathpix e o EPUB depois da revisão. Em seguida, a tabela mostra o que mudou de uma versão para outra.
       </p>
+      <p className="comparison-source-note">
+        A amostra corresponde à página 3 de <cite>Pré-cálculo: operações, equações, funções e trigonometria</cite>, de Francisco Magalhães Gomes (Cengage Learning, 2019). <a href="https://ime.unicamp.br/~chico/pre-calculo/livro.htm" target="_blank" rel="noreferrer">Consultar dados bibliográficos<span className="sr-only"> (abre em nova aba)</span></a>.
+      </p>
 
       <div className="comparison-mobile-tabs" role="group" aria-label="Selecionar etapa para visualizar">
         <button className={activeStage === "source" ? "is-active" : ""} type="button" aria-pressed={activeStage === "source"} aria-controls="comparison-panel-source" onClick={() => setActiveStage("source")}>Imagem</button>
@@ -82,8 +85,8 @@ export function AccessibilityComparison() {
       </div>
 
       <section className="research-panels" aria-label="Visualização das três etapas">
-        <EvidencePanel id="source" title="Imagem de origem" description="Página usada como ponto de partida" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem<span className="sr-only"> em nova aba</span></a>}>
-          <div className="source-image-viewer"><img src={`${base}artifacts/captura-de-livro.png`} alt="Página digitalizada do capítulo Números reais, usada como fonte do experimento." /></div>
+        <EvidencePanel id="source" title="Imagem de origem" description="Página 3 do livro Pré-cálculo" activeStage={activeStage} action={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer">Abrir imagem<span className="sr-only"> em nova aba</span></a>}>
+          <div className="source-image-viewer"><img src={`${base}artifacts/captura-de-livro.png`} alt="Página 3 do livro Pré-cálculo, de Francisco Magalhães Gomes, com conteúdo do capítulo Números reais." /></div>
         </EvidencePanel>
 
         <EvidencePanel id="markdown" title="Transcrição em Markdown" description="Texto extraído automaticamente pelo Mathpix" activeStage={activeStage} action={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download>Baixar Markdown</a>}>

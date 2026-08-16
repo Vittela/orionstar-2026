@@ -1,8 +1,8 @@
 export function Header() {
   return (
     <header className="project-header">
-      <div className="event-mark" aria-label="OrionStar 2026">
-        <span>OrionHub Lab · UFAL</span>
+      <div className="event-mark">
+        <span>OrionHub 2026 · Laboratório Orion</span>
         <strong>OrionStar 2026</strong>
       </div>
 

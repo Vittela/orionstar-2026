@@ -1,13 +1,22 @@
 {
   "name": "orionstar-2026",
   "private": true,
-  "version": "0.9.0",
+  "version": "1.0.0",
+  "description": "Interactive presentation of an AI-assisted workflow for reconstructing accessible EPUB publications from digitized books.",
+  "author": "João Victor Correia de Araujo da Silva",
+  "license": "MIT",
+  "homepage": "https://vittela.github.io/orionstar-2026/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vittela/orionstar-2026.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check": "npm run lint && npm run build"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
