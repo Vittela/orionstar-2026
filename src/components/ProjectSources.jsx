@@ -20,7 +20,7 @@ export function ProjectSources() {
     <footer className="project-sources" aria-labelledby="sources-title">
       <div className="project-sources__heading">
         <h2 id="sources-title">Referências</h2>
-        <p>Documentos e ferramentas relacionados aos critérios apresentados no projeto.</p>
+        <p>Normas, estudos e ferramentas consultados durante o desenvolvimento.</p>
       </div>
       <div className="source-groups">
         {groups.map((group) => (
