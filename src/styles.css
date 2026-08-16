@@ -132,6 +132,9 @@ button { font: inherit; }
   border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
+.artifact-preview-image { display: block; width: 94%; max-width: 100%; max-height: 86%; object-fit: contain; }
+.artifact-preview-image--interface { width: 88%; height: 88%; }
+
 .artifact-card__body { display: block; padding: 20px 20px 22px; }
 .artifact-card__eyebrow { display: block; color: var(--accent); font-size: 0.69rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 .artifact-card__title-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; }
