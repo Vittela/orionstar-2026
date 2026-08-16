@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SOURCES } from "../data/sources";
 
 const nodes = [
@@ -31,6 +31,64 @@ function getTypeName(node) {
 
 function StatusLabel({ status }) {
   return <span className={`status-label status-label--${status}`}>{statusNames[status]}</span>;
+}
+
+function FigurePreview({ selected }) {
+  const [expanded, setExpanded] = useState(false);
+  const triggerRef = useRef(null);
+  const closeRef = useRef(null);
+  const source = `${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`;
+
+  const closePreview = useCallback(() => {
+    setExpanded(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    if (!expanded) return undefined;
+
+    closeRef.current?.focus();
+    const handleKeyDown = (event) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        closeRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closePreview();
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [closePreview, expanded]);
+
+  return (
+    <>
+      <figure className="figure-preview">
+        <button ref={triggerRef} className="figure-preview__trigger" type="button" onClick={() => setExpanded(true)} aria-label={`Ampliar ${selected.label}`}>
+          <img src={source} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" />
+          <span>Ampliar figura</span>
+        </button>
+        <figcaption>A imagem é exibida por inteiro. Selecione para abrir em tamanho maior.</figcaption>
+      </figure>
+
+      {expanded && (
+        <div className="figure-lightbox" role="dialog" aria-modal="true" aria-labelledby="figure-lightbox-title" onMouseDown={(event) => event.target === event.currentTarget && closePreview()}>
+          <div className="figure-lightbox__dialog">
+            <header>
+              <div><span>Visualização ampliada</span><h3 id="figure-lightbox-title">{selected.label}</h3></div>
+              <button ref={closeRef} type="button" onClick={closePreview}>Fechar</button>
+            </header>
+            <div className="figure-lightbox__viewport">
+              <img src={source} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 function ImportScreen({ onContinue }) {
@@ -155,7 +213,7 @@ function ElementPreview({ selected }) {
         <StatusLabel status={selected.status} />
       </header>
 
-      {selected.type === "figure" && <div className="element-preview__figure"><img src={`${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" /></div>}
+      {selected.type === "figure" && <FigurePreview selected={selected} />}
       {selected.type === "formula" && <div className="element-preview__formula"><span>√2 ≈ 1,4142136</span><small>Representação matemática reconhecida</small></div>}
       {["heading", "note"].includes(selected.type) && <blockquote>{selected.label}</blockquote>}
     </section>
