@@ -14,6 +14,11 @@ const nodes = [
 const typeNames = { heading: "Título", note: "Nota", formula: "Fórmula", figure: "Figura", table: "Tabela" };
 const statusNames = { ok: "Verificado", pending: "Revisar", error: "Erro" };
 
+function getTypeName(node) {
+  if (node.type === "heading") return `Título H${node.level + 1}`;
+  return typeNames[node.type];
+}
+
 function StatusLabel({ status }) {
   return <span className={`status-label status-label--${status}`}>{statusNames[status]}</span>;
 }
@@ -58,60 +63,100 @@ function ImportScreen({ onContinue }) {
 }
 
 function DocumentPanel({ selected }) {
+  const [zoom, setZoom] = useState(86);
+
   return (
     <section className="workspace-panel document-panel" aria-labelledby="document-panel-title">
-      <header><h3 id="document-panel-title">Documento</h3><span>Página 1 de 1 · 86%</span></header>
+      <header className="document-toolbar">
+        <div><h3 id="document-panel-title">Documento original</h3><span aria-live="polite">Selecionado: {selected.label}</span></div>
+        <div className="document-zoom" aria-label="Controles de zoom">
+          <button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(60, value - 10))}>−</button>
+          <span>{zoom}%</span>
+          <button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(120, value + 10))}>+</button>
+          <button type="button" onClick={() => setZoom(86)}>Ajustar</button>
+        </div>
+      </header>
       <div className="document-canvas">
-        <img src={`${import.meta.env.BASE_URL}artifacts/captura-de-livro.png`} alt="Página original sobre números reais" />
-        <span className={`document-highlight document-highlight--${selected.type}`} aria-hidden="true" />
-        {selected.status !== "ok" && <span className="document-warning">{selected.type === "figure" ? "Figura sem texto alternativo" : "Elemento para revisar"}</span>}
+        <div className="document-page" style={{ "--document-width": `${zoom}%` }}>
+          <img src={`${import.meta.env.BASE_URL}artifacts/captura-de-livro.png`} alt="Página original sobre números reais" />
+          <span className={`document-highlight document-highlight--${selected.type}`} aria-hidden="true" />
+          {selected.status !== "ok" && <span className="document-warning">{selected.type === "figure" ? "Figura sem texto alternativo" : "Elemento para revisar"}</span>}
+        </div>
       </div>
-      <footer><button type="button" aria-label="Diminuir zoom">−</button><span>86%</span><button type="button" aria-label="Aumentar zoom">+</button><button type="button">Ajustar</button></footer>
     </section>
   );
 }
 
 function StructurePanel({ selectedId, onSelect }) {
+  const verified = nodes.filter((node) => node.status === "ok").length;
+  const needsReview = nodes.length - verified;
+
   return (
-    <section className="workspace-panel structure-panel" aria-labelledby="structure-panel-title">
-      <header><h3 id="structure-panel-title">Estrutura e ordem de leitura</h3><span>7 elementos</span></header>
-      <div className="structure-tree">
+    <aside className="workspace-panel structure-panel" aria-labelledby="structure-panel-title">
+      <header><h3 id="structure-panel-title">Estrutura</h3><span>{nodes.length} elementos</span></header>
+      <div className="structure-summary"><strong>{verified} verificados</strong><span>{needsReview} para revisar</span></div>
+      <nav className="structure-tree" aria-label="Estrutura semântica e ordem de leitura">
         {nodes.map((node, index) => (
-          <button key={node.id} className={selectedId === node.id ? "is-selected" : ""} type="button" onClick={() => onSelect(node.id)} style={{ "--tree-level": node.level }}>
+          <button
+            key={node.id}
+            className={`tree-level-${node.level}${selectedId === node.id ? " is-selected" : ""}`}
+            type="button"
+            aria-pressed={selectedId === node.id}
+            onClick={() => onSelect(node.id)}
+            style={{ "--tree-level": node.level, "--tree-indent": `${node.level * 24}px` }}
+          >
             <span className="tree-order">{index + 1}</span>
-            <span className="tree-node-label"><strong>{node.label}</strong><small>{typeNames[node.type]}</small></span>
+            <span className="tree-node-label"><strong>{node.label}</strong><small>{getTypeName(node)}</small></span>
             <StatusLabel status={node.status} />
           </button>
         ))}
+      </nav>
+      <div className="structure-validation">
+        <strong>Validação prevista</strong>
+        <p><a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> para acessibilidade e <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a> para conformidade técnica.</p>
       </div>
-      <button className="structure-add" type="button">Adicionar elemento</button>
+    </aside>
+  );
+}
+
+function ElementPreview({ selected }) {
+  return (
+    <section className="element-preview" aria-labelledby="selected-element-title">
+      <p className="sr-only" aria-live="polite">Elemento selecionado: {selected.label}. Estado: {statusNames[selected.status]}.</p>
+      <header>
+        <div><span>{getTypeName(selected)}</span><h4 id="selected-element-title">{selected.label}</h4></div>
+        <StatusLabel status={selected.status} />
+      </header>
+
+      {selected.type === "figure" && <div className="element-preview__figure"><img src={`${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`} alt="Circunferência com o diâmetro marcado e uma seta indicando seu comprimento" /></div>}
+      {selected.type === "formula" && <div className="element-preview__formula"><span>√2 ≈ 1,4142136</span><small>Representação matemática reconhecida</small></div>}
+      {selected.type === "table" && <p className="element-preview__message"><strong>Cabeçalhos ausentes.</strong> A estrutura da tabela precisa ser definida.</p>}
+      {["heading", "note"].includes(selected.type) && <blockquote>{selected.label}</blockquote>}
     </section>
   );
 }
 
 function InspectorPanel({ selected, altText, setAltText, onMessage }) {
   return (
-    <section className="workspace-panel inspector-panel" aria-labelledby="inspector-panel-title">
-      <header><h3 id="inspector-panel-title">Revisar elemento</h3><span>{typeNames[selected.type]}</span></header>
+    <aside className="workspace-panel inspector-panel" aria-labelledby="inspector-panel-title">
+      <header><h3 id="inspector-panel-title">Editar elemento</h3><span>{getTypeName(selected)}</span></header>
+      <ElementPreview selected={selected} />
       <div className="inspector-form">
-        <label>Tipo de elemento<input value={typeNames[selected.type]} readOnly /></label>
+        <label>Tipo de elemento<input value={getTypeName(selected)} readOnly /></label>
         <label>Ordem de leitura<div className="order-input"><button type="button" aria-label="Mover para trás">−</button><input value={nodes.findIndex((node) => node.id === selected.id) + 1} readOnly aria-label="Posição na ordem de leitura" /><button type="button" aria-label="Mover para frente">+</button></div></label>
 
         {selected.type === "figure" && <>
-          <div className="inspector-figure"><img src={`${import.meta.env.BASE_URL}epub-preview/EPUB/images/figura-1-1-circunferencia.png`} alt="Prévia da figura selecionada" /></div>
           <label>Texto alternativo<textarea value={altText} onChange={(event) => setAltText(event.target.value)} rows="4" /></label>
-          <label>Descrição longa<textarea placeholder="Descreva relações, dados e contexto visual…" rows="3" /></label>
+          <label>Descrição longa<textarea placeholder="Descreva relações, dados e contexto visual…" rows="4" /></label>
           <button className="secondary-action" type="button" onClick={() => { setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento."); onMessage("Sugestão inserida como rascunho; revise antes de aprovar."); }}>Sugerir texto alternativo</button>
         </>}
 
         {selected.type === "formula" && <>
-          <div className="mathml-preview"><small>Prévia MathML</small><span>√2 ≈ 1,4142136</span></div>
-          <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="4" /></label>
+          <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="5" /></label>
           <button className="secondary-action" type="button" onClick={() => onMessage("Descrição sugerida; confirme a pronúncia antes de aprovar.")}>Sugerir descrição</button>
         </>}
 
         {selected.type === "table" && <>
-          <p className="inspector-alert"><strong>Cabeçalhos ausentes.</strong> Defina-os para permitir navegação célula a célula.</p>
           <label>Cabeçalhos de coluna<select defaultValue="first-row"><option value="first-row">Usar primeira linha</option></select></label>
           <label>Cabeçalhos de linha<select defaultValue="undefined"><option value="undefined">Não definido</option></select></label>
         </>}
@@ -119,64 +164,32 @@ function InspectorPanel({ selected, altText, setAltText, onMessage }) {
         {["heading", "note"].includes(selected.type) && <>
           <label>Nível hierárquico<select defaultValue="level"><option value="level">{selected.level === 0 ? "H1 — título do capítulo" : "H2 — seção"}</option></select></label>
           <label>Idioma do trecho<select defaultValue="pt-BR"><option value="pt-BR">Português (Brasil)</option></select></label>
-          <label>Conteúdo<textarea defaultValue={selected.label} rows="4" /></label>
+          <label>Conteúdo<textarea defaultValue={selected.label} rows="5" /></label>
         </>}
       </div>
-    </section>
-  );
-}
-
-function CompliancePanel({ onSelectIssue }) {
-  const groups = [
-    ["Estrutura e navegação", "3 de 3", "ok"],
-    ["Conteúdo não textual", "4 de 6", "pending"],
-    ["Metadados de acessibilidade", "5 de 5", "ok"],
-    ["Declaração de conformidade", "Pendente", "pending"],
-  ];
-
-  return (
-    <section className="workspace-panel compliance-panel" aria-labelledby="compliance-panel-title">
-      <header><h3 id="compliance-panel-title">Verificação</h3><span>14 de 17 itens</span></header>
-      <div className="compliance-groups">
-        {groups.map(([title, count, status], index) => (
-          <button key={title} type="button" onClick={() => status === "pending" && onSelectIssue(index === 1 ? "figure" : "formula")}>
-            <span><strong>{title}</strong><small>{count}</small></span>
-            <StatusLabel status={status} />
-          </button>
-        ))}
-      </div>
-      <p className="compliance-tools">Validação prevista com <a href={SOURCES.ace.url} target="_blank" rel="noreferrer">Ace by DAISY</a> e <a href={SOURCES.epubCheck.url} target="_blank" rel="noreferrer">EPUBCheck</a>.</p>
-    </section>
+    </aside>
   );
 }
 
 function WorkspaceScreen() {
   const [selectedId, setSelectedId] = useState("figure");
-  const [mobileTab, setMobileTab] = useState("structure");
+  const [mobileTab, setMobileTab] = useState("document");
   const [altText, setAltText] = useState("");
   const [message, setMessage] = useState("");
   const selected = useMemo(() => nodes.find((node) => node.id === selectedId) ?? nodes[0], [selectedId]);
 
-  const selectFromCompliance = (id) => {
-    setSelectedId(id);
-    setMobileTab("inspector");
-    setMessage("Pendência localizada. Revise o elemento selecionado.");
-  };
-
   return (
     <section className="prototype-workspace">
-      <div className="workspace-context"><strong>capitulo-numeros-reais.pdf</strong><span>1 página · processamento local</span></div>
+      <div className="workspace-context"><div><strong>capitulo-numeros-reais.pdf</strong><span>1 página · processamento local</span></div><span>Em revisão</span></div>
       <div className={`workspace-grid mobile-tab-${mobileTab}`}>
-        <DocumentPanel selected={selected} />
         <StructurePanel selectedId={selectedId} onSelect={(id) => { setSelectedId(id); setMobileTab("inspector"); }} />
+        <DocumentPanel selected={selected} />
         <InspectorPanel selected={selected} altText={altText} setAltText={setAltText} onMessage={setMessage} />
-        <CompliancePanel onSelectIssue={selectFromCompliance} />
       </div>
       <nav className="workspace-mobile-tabs" aria-label="Painéis do espaço de trabalho">
-        <button className={mobileTab === "document" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "document"} onClick={() => setMobileTab("document")}>Documento</button>
         <button className={mobileTab === "structure" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "structure"} onClick={() => setMobileTab("structure")}>Estrutura</button>
+        <button className={mobileTab === "document" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "document"} onClick={() => setMobileTab("document")}>Documento</button>
         <button className={mobileTab === "inspector" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "inspector"} onClick={() => setMobileTab("inspector")}>Elemento</button>
-        <button className={mobileTab === "compliance" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "compliance"} onClick={() => setMobileTab("compliance")}>Verificação</button>
       </nav>
       <footer className="workspace-actions">
         <span aria-live="polite">{message || "Protótipo navegável; nenhuma alteração é enviada."}</span>
@@ -196,7 +209,7 @@ export function ProductInterfaceMockup() {
         <div className="prototype-brand"><strong>Conversor acessível</strong><span>Protótipo acadêmico</span></div>
         <nav aria-label="Etapas do processo">
           <button className={screen === "import" ? "is-current" : ""} type="button" aria-pressed={screen === "import"} onClick={() => setScreen("import")}>1. Importar</button>
-          <button className={screen === "workspace" ? "is-current" : ""} type="button" aria-pressed={screen === "workspace"} onClick={() => setScreen("workspace")}>2. Organizar e verificar</button>
+          <button className={screen === "workspace" ? "is-current" : ""} type="button" aria-pressed={screen === "workspace"} onClick={() => setScreen("workspace")}>2. Organizar e revisar</button>
         </nav>
         <span className="prototype-mode">Processamento local</span>
       </header>
