@@ -2,11 +2,11 @@ import { lazy, Suspense, useCallback, useState } from "react";
 import { ArtifactCard } from "./components/ArtifactCard";
 import { ArtifactModal } from "./components/ArtifactModal";
 import { AccessibilityComparison } from "./components/AccessibilityComparison";
-import { BookReaderMockup } from "./components/BookReaderMockup";
-import { BookReaderPreview } from "./components/BookReaderPreview";
 import { ComparisonPreview } from "./components/ComparisonPreview";
 import { FlowPreview } from "./components/FlowPreview";
 import { Header } from "./components/Header";
+import { ProductInterfaceMockup } from "./components/ProductInterfaceMockup";
+import { ProductInterfacePreview } from "./components/ProductInterfacePreview";
 
 const ExcalidrawViewer = lazy(() =>
   import("./components/ExcalidrawViewer").then((module) => ({ default: module.ExcalidrawViewer })),
@@ -23,11 +23,11 @@ const artifacts = [
   },
   {
     id: "mockup",
-    eyebrow: "02 · Experiência",
-    title: "Livro navegável",
-    description: "Mockup interativo da leitura reconstruída.",
+    eyebrow: "02 · Interface",
+    title: "Conversor acessível",
+    description: "Mockup navegável do fluxo de importação, revisão e conformidade.",
     accent: "#e07a5f",
-    preview: <BookReaderPreview />,
+    preview: <ProductInterfacePreview />,
   },
   {
     id: "comparison",
@@ -77,8 +77,8 @@ export default function App() {
       )}
 
       {selectedArtifact === "mockup" && (
-        <ArtifactModal eyebrow="02 · Experiência" title="Livro navegável" onClose={closeArtifact}>
-          <BookReaderMockup />
+        <ArtifactModal eyebrow="02 · Interface" title="Mockup do conversor acessível" onClose={closeArtifact}>
+          <ProductInterfaceMockup />
         </ArtifactModal>
       )}
 
