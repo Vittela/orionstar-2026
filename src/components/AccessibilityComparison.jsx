@@ -1,138 +1,118 @@
-import { AlertTriangle, Check, Download, ExternalLink, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, ExternalLink, FileCode2, FileImage, Library, List, TextSearch } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
 
-const criteria = {
-  image: [
-    ["Texto selecionável", "fail", "O conteúdo permanece preso aos pixels; leitores de tela não recebem texto."],
-    ["Idioma declarado", "fail", "Uma imagem não informa o idioma do conteúdo às tecnologias assistivas."],
-    ["Hierarquia e navegação", "fail", "Títulos, exemplos, notas e figuras não possuem estrutura navegável."],
-    ["Ordem de leitura", "fail", "A composição em duas colunas depende apenas da interpretação visual."],
-    ["Matemática acessível", "fail", "Raízes, frações e símbolos não têm representação semântica."],
-    ["Descrição de figuras", "fail", "Os três diagramas não possuem texto alternativo ou descrição longa."],
-    ["Conteúdo refluível", "fail", "O layout é fixo e exige zoom ou deslocamento em telas pequenas."],
-  ],
-  pdf: [
-    ["Texto selecionável", "partial", "Há uma camada de texto OCR, mas a extração contém caracteres corrompidos e espaços indevidos."],
-    ["Idioma declarado", "fail", "O arquivo declara inglês (en-US), embora o conteúdo esteja em português."],
-    ["Hierarquia e navegação", "partial", "Existe uma árvore de marcação, porém não há sumário interno e a divisão em duas páginas fragmenta o conteúdo."],
-    ["Ordem de leitura", "fail", "A extração lê a nota lateral e a Figura 1.3 antes do texto principal, alterando a sequência."],
-    ["Matemática acessível", "fail", "Símbolos como π, √2 e ℝ desaparecem ou são extraídos de forma incorreta."],
-    ["Descrição de figuras", "fail", "As ilustrações não foram preservadas no PDF e não há alternativas textuais equivalentes."],
-    ["Conteúdo refluível", "fail", "A paginação fixa mantém a dependência de zoom e deslocamento."],
-  ],
-  epub: [
-    ["Texto selecionável", "pass", "Todo o conteúdo está em texto Unicode pesquisável e compatível com leitores de tela."],
-    ["Idioma declarado", "pass", "A publicação e seus documentos declaram corretamente pt-BR."],
-    ["Hierarquia e navegação", "pass", "HTML semântico, sumário EPUB e landmarks permitem navegar por seções e figuras."],
-    ["Ordem de leitura", "pass", "O conteúdo foi reorganizado em uma sequência linear e coerente."],
-    ["Matemática acessível", "pass", "Expressões usam MathML e incluem alternativas textuais contextualizadas."],
-    ["Descrição de figuras", "pass", "Cada figura tem legenda, texto alternativo e descrição detalhada."],
-    ["Conteúdo refluível", "pass", "Texto e elementos se adaptam à largura, ao tamanho da fonte e às preferências do leitor."],
-  ],
-};
+const observations = [
+  ["Papel no fluxo", "Saída intermediária de reconhecimento e transcrição, adequada para revisão textual.", "Publicação final reconstruída, empacotada para leitura e navegação assistiva."],
+  ["Texto e fórmulas", "Transcrição legível e fórmulas preservadas em LaTeX, inclusive frações, raízes e símbolos.", "Texto revisado em Unicode e expressões convertidas para MathML com alternativas textuais."],
+  ["Estrutura semântica", "O arquivo recebido é texto corrido: títulos e exemplos são reconhecíveis visualmente, mas não usam marcações de heading.", "Capítulo, seções, notas e figuras são representados por elementos semânticos explícitos."],
+  ["Ordem de leitura", "Lineariza o conteúdo, mas posiciona a caixa “No computador” e a Figura 1.3 antes do trecho principal correspondente.", "A sequência foi reorganizada editorialmente para leitura contínua e navegação por seções."],
+  ["Conteúdo visual", "Preserva as chamadas e legendas das figuras, mas não incorpora as três imagens nem descreve seu conteúdo.", "Incorpora as figuras, legendas, textos alternativos e descrições detalhadas."],
+  ["Navegação e metadados", "Não se propõe a fornecer sumário EPUB, landmarks ou metadados de acessibilidade.", "Inclui documento de navegação, landmarks, idioma e metadados da EPUB Accessibility 1.1."],
+  ["Intervenção humana", "Oferece uma base editável de boa qualidade, mas ainda exige organização, conferência e complementação.", "Registra o resultado da revisão: corrige ordem, adiciona semântica e produz equivalentes para conteúdo não textual."],
+];
 
-function CriterionIcon({ status }) {
-  if (status === "pass") return <Check size={15} strokeWidth={2.5} aria-hidden="true" />;
-  if (status === "partial") return <AlertTriangle size={15} strokeWidth={2.2} aria-hidden="true" />;
-  return <X size={15} strokeWidth={2.5} aria-hidden="true" />;
+function MarkdownOutputViewer() {
+  const [source, setSource] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${import.meta.env.BASE_URL}artifacts/ocr-avancado-mathpix.md`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Não foi possível carregar o Markdown.");
+        return response.text();
+      })
+      .then(setSource)
+      .catch((requestError) => requestError.name !== "AbortError" && setError(requestError.message));
+    return () => controller.abort();
+  }, []);
+
+  if (error) return <div className="research-viewer__status">{error}</div>;
+  if (!source) return <div className="research-viewer__status">Carregando transcrição…</div>;
+
+  return <article className="markdown-render"><ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{source}</ReactMarkdown></article>;
 }
 
-function CriteriaList({ items }) {
+function EpubOutputViewer() {
+  const [view, setView] = useState("content");
+  const base = import.meta.env.BASE_URL;
+  const source = view === "toc" ? `${base}epub-preview/EPUB/nav.xhtml` : `${base}epub-preview/EPUB/text/content.xhtml`;
+
   return (
-    <ul className="criteria-list">
-      {items.map(([label, status, comment]) => (
-        <li key={label} className={`criterion criterion--${status}`}>
-          <span className="criterion__icon"><CriterionIcon status={status} /></span>
-          <span><strong>{label}</strong><small>{comment}</small></span>
-        </li>
-      ))}
-    </ul>
+    <div className="epub-embedded-viewer">
+      <nav aria-label="Navegação da visualização EPUB">
+        <button className={view === "toc" ? "is-active" : ""} type="button" onClick={() => setView("toc")}><List size={14} />Sumário</button>
+        <button className={view === "content" ? "is-active" : ""} type="button" onClick={() => setView("content")}><Library size={14} />Conteúdo</button>
+      </nav>
+      <iframe key={source} src={source} title={view === "toc" ? "Sumário do EPUB reconstruído" : "Conteúdo do EPUB reconstruído"} sandbox="allow-same-origin allow-popups" />
+    </div>
   );
 }
 
-function FormatCard({ step, label, title, score, scoreLabel, tone, preview, items, action }) {
+function EvidencePanel({ id, label, title, description, icon, activeStage, children, actions }) {
   return (
-    <article className="format-card" style={{ "--format-tone": tone }}>
-      <header className="format-card__header">
-        <span className="format-card__step">{step}</span>
-        <div>
-          <p>{label}</p>
-          <h3>{title}</h3>
-        </div>
-        <span className="format-card__score"><strong>{score}</strong><small>{scoreLabel}</small></span>
+    <article className={`research-panel research-panel--${id}${activeStage === id ? " is-mobile-active" : ""}`}>
+      <header>
+        <span className="research-panel__index">{label}</span>
+        <span className="research-panel__icon">{icon}</span>
+        <div><h4>{title}</h4><p>{description}</p></div>
+        <div className="research-panel__actions">{actions}</div>
       </header>
-      <div className="format-card__preview">{preview}</div>
-      <CriteriaList items={items} />
-      {action}
+      <div className="research-panel__viewport">{children}</div>
     </article>
   );
 }
 
 export function AccessibilityComparison() {
+  const [activeStage, setActiveStage] = useState("markdown");
   const base = import.meta.env.BASE_URL;
 
   return (
-    <div className="comparison-viewer">
-      <header className="comparison-intro">
-        <div>
-          <span className="comparison-intro__label">Análise do mesmo conteúdo em três estágios</span>
-          <h3>Da fidelidade visual à acessibilidade estrutural</h3>
-        </div>
-        <div className="comparison-legend" aria-label="Legenda dos resultados">
-          <span><i className="legend-dot legend-dot--pass" />Atende</span>
-          <span><i className="legend-dot legend-dot--partial" />Parcial</span>
-          <span><i className="legend-dot legend-dot--fail" />Não atende</span>
-        </div>
+    <div className="academic-comparison">
+      <header className="research-heading">
+        <div><span>ARTEFATO 3 · ESTUDO COMPARATIVO</span><h3>Reconhecimento de conteúdo e reconstrução acessível</h3></div>
+        <dl><div><dt>Objeto</dt><dd>1 página didática digitalizada</dd></div><div><dt>Método</dt><dd>Inspeção estrutural e visual dos arquivos</dd></div></dl>
       </header>
 
-      <p className="comparison-note">
-        Resultados observados nestes arquivos específicos. A análise combina inspeção da estrutura, extração de texto e revisão do conteúdo.
-      </p>
+      <section className="research-question" aria-labelledby="research-question-title">
+        <TextSearch size={19} /><div><strong id="research-question-title">Questão observada</strong><p>Quais informações são preservadas pela transcrição automatizada e quais dependem de reconstrução semântica e revisão humana para formar uma publicação acessível?</p></div>
+      </section>
 
-      <div className="comparison-grid" tabIndex="0" aria-label="Comparação horizontal dos três formatos">
-        <FormatCard
-          step="01"
-          label="Fonte"
-          title="Imagem digitalizada"
-          score="0/7"
-          scoreLabel="critérios"
-          tone="#b54b4f"
-          preview={<img src={`${base}artifacts/captura-de-livro.png`} alt="Página digitalizada do capítulo Números reais, com texto, fórmulas e três figuras." />}
-          items={criteria.image}
-          action={<a className="format-card__action" href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer"><ExternalLink size={16} />Abrir imagem original</a>}
-        />
+      <p className="comparison-method-note">Os formatos não são tratados como produtos concorrentes. O Markdown é uma saída intermediária de OCR; o EPUB é o resultado posterior de organização, enriquecimento e validação editorial.</p>
 
-        <FormatCard
-          step="02"
-          label="Automação"
-          title="PDF com OCR avançado"
-          score="1/7"
-          scoreLabel="+ 2 parciais"
-          tone="#c77a26"
-          preview={<object data={`${base}artifacts/ocr-avancado-mathpix.pdf#toolbar=0&navpanes=0&view=FitH`} type="application/pdf" aria-label="Prévia do PDF com OCR"><span>A prévia do PDF não está disponível neste navegador.</span></object>}
-          items={criteria.pdf}
-          action={<a className="format-card__action" href={`${base}artifacts/ocr-avancado-mathpix.pdf`} target="_blank" rel="noreferrer"><ExternalLink size={16} />Examinar PDF completo</a>}
-        />
+      <nav className="comparison-mobile-tabs" aria-label="Selecionar estágio para visualizar">
+        <button className={activeStage === "source" ? "is-active" : ""} type="button" onClick={() => setActiveStage("source")}>Fonte</button>
+        <button className={activeStage === "markdown" ? "is-active" : ""} type="button" onClick={() => setActiveStage("markdown")}>Markdown</button>
+        <button className={activeStage === "epub" ? "is-active" : ""} type="button" onClick={() => setActiveStage("epub")}>EPUB</button>
+      </nav>
 
-        <FormatCard
-          step="03"
-          label="Reconstrução"
-          title="EPUB semântico"
-          score="7/7"
-          scoreLabel="critérios"
-          tone="#3a8d73"
-          preview={
-            <div className="epub-miniature">
-              <span>CAPÍTULO 1</span>
-              <strong>Números reais</strong>
-              <p>Exemplo 1: O número π</p>
-              <div><i>π</i><b>=</b><em>comprimento ÷ diâmetro</em></div>
-              <small>Figura 1.1 — descrição detalhada disponível</small>
-            </div>
-          }
-          items={criteria.epub}
-          action={<a className="format-card__action format-card__action--primary" href={`${base}artifacts/reconstrucao-validada.epub`} download><Download size={16} />Baixar EPUB acessível</a>}
-        />
-      </div>
+      <section className="research-panels" aria-label="Visualização dos três estágios">
+        <EvidencePanel id="source" label="01" title="Imagem de origem" description="Referência visual do conteúdo" icon={<FileImage size={17} />} activeStage={activeStage} actions={<a href={`${base}artifacts/captura-de-livro.png`} target="_blank" rel="noreferrer" aria-label="Abrir imagem em nova aba"><ExternalLink size={15} /></a>}>
+          <div className="source-image-viewer"><img src={`${base}artifacts/captura-de-livro.png`} alt="Página digitalizada do capítulo Números reais, usada como fonte do experimento." /></div>
+        </EvidencePanel>
+
+        <EvidencePanel id="markdown" label="02" title="Saída Mathpix · Markdown" description="Transcrição automática com LaTeX" icon={<FileCode2 size={17} />} activeStage={activeStage} actions={<a href={`${base}artifacts/ocr-avancado-mathpix.md`} download aria-label="Baixar Markdown"><Download size={15} /></a>}>
+          <MarkdownOutputViewer />
+        </EvidencePanel>
+
+        <EvidencePanel id="epub" label="03" title="EPUB reconstruído" description="Publicação semântica após revisão" icon={<Library size={17} />} activeStage={activeStage} actions={<a href={`${base}artifacts/reconstrucao-validada.epub`} download aria-label="Baixar EPUB"><Download size={15} /></a>}>
+          <EpubOutputViewer />
+        </EvidencePanel>
+      </section>
+
+      <section className="comparison-analysis" aria-labelledby="analysis-title">
+        <header><span>ANÁLISE</span><h3 id="analysis-title">Observações por dimensão</h3></header>
+        <div className="analysis-table" role="table" aria-label="Comparação entre a saída Markdown e o EPUB reconstruído">
+          <div className="analysis-row analysis-row--head" role="row"><span role="columnheader">Dimensão</span><span role="columnheader">Markdown Mathpix</span><span role="columnheader">EPUB reconstruído</span></div>
+          {observations.map(([dimension, markdown, epub]) => <div className="analysis-row" role="row" key={dimension}><strong role="rowheader">{dimension}</strong><p role="cell">{markdown}</p><p role="cell">{epub}</p></div>)}
+        </div>
+      </section>
+
+      <section className="comparison-conclusion"><strong>Síntese</strong><p>A transcrição Markdown preserva com boa qualidade o texto e a notação matemática, cumprindo bem seu papel como base editável. A acessibilidade do EPUB surge em uma etapa distinta: revisão da ordem, marcação estrutural, reinserção e descrição de figuras, conversão para MathML, navegação e metadados.</p></section>
     </div>
   );
 }
