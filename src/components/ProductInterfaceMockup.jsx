@@ -12,7 +12,17 @@ const nodes = [
 ];
 
 const typeNames = { heading: "Título", note: "Nota", formula: "Fórmula", figure: "Figura", table: "Tabela" };
-const statusNames = { ok: "Verificado", pending: "Revisar", error: "Erro" };
+const statusNames = { ok: "Confirmado", pending: "Revisar", error: "Corrigir" };
+
+const aiSuggestions = {
+  chapter: { confidence: 98, text: "O tamanho e a posição indicam que este trecho abre o capítulo.", action: "Manter como título H1" },
+  note: { confidence: 90, text: "O bloco lateral parece complementar o texto principal e pode ser marcado como nota.", action: "Manter como nota" },
+  intro: { confidence: 95, text: "A mudança de assunto e o destaque visual indicam o início de uma nova seção.", action: "Manter como título H2" },
+  formula: { confidence: 96, text: "A expressão foi reconhecida, mas a forma de leitura ainda precisa ser conferida.", action: "Usar a descrição sugerida" },
+  example: { confidence: 94, text: "O rótulo e a posição indicam um exemplo dentro da seção atual.", action: "Manter como título H2" },
+  figure: { confidence: 92, text: "A imagem mostra uma circunferência com o diâmetro destacado. A descrição precisa ser confirmada antes da exportação.", action: "Usar o texto alternativo sugerido" },
+  table: { confidence: 71, text: "O conteúdo parece tabular, mas os cabeçalhos não puderam ser identificados com segurança.", action: "Marcar a primeira linha como cabeçalho" },
+};
 
 function getTypeName(node) {
   if (node.type === "heading") return `Título H${node.level + 1}`;
@@ -29,8 +39,8 @@ function ImportScreen({ onContinue }) {
   return (
     <section className="prototype-import" aria-labelledby="import-title">
       <div className="prototype-import__heading">
-        <h3 id="import-title">Importar documento</h3>
-        <p>Adicione um PDF ou uma imagem digitalizada para iniciar a reconstrução semântica.</p>
+        <h3 id="import-title">Analisar um documento</h3>
+        <p>Envie um PDF ou uma imagem. A IA identifica títulos, ordem de leitura, fórmulas e figuras para montar uma primeira versão estruturada.</p>
       </div>
 
       <button className="prototype-dropzone" type="button">
@@ -41,22 +51,22 @@ function ImportScreen({ onContinue }) {
       </button>
 
       <fieldset className="processing-options">
-        <legend>Como processar</legend>
+        <legend>Onde executar a análise</legend>
         <div>
           <label className={processing === "local" ? "is-selected" : ""}>
             <input type="radio" name="processing" value="local" checked={processing === "local"} onChange={() => setProcessing("local")} />
-            <span><strong>Local</strong><small>Prioriza privacidade e mantém os arquivos no dispositivo.</small></span>
+            <span><strong>No dispositivo</strong><small>O modelo processa o documento localmente e mantém o arquivo no computador.</small></span>
           </label>
           <label className={processing === "cloud" ? "is-selected" : ""}>
             <input type="radio" name="processing" value="cloud" checked={processing === "cloud"} onChange={() => setProcessing("cloud")} />
-            <span><strong>Nuvem</strong><small>Pode melhorar OCR e sugestões, mas requer conexão.</small></span>
+            <span><strong>Na nuvem</strong><small>Usa modelos mais completos para OCR e descrições, mas requer conexão.</small></span>
           </label>
         </div>
       </fieldset>
 
       <div className="prototype-file-estimate">
-        <span><strong>capitulo-numeros-reais.pdf</strong><small>1 página · estimativa de 40 segundos</small></span>
-        <button type="button" onClick={onContinue}>Organizar e verificar</button>
+        <span><strong>capitulo-numeros-reais.pdf</strong><small>1 página · análise estimada em 40 segundos</small></span>
+        <button type="button" onClick={onContinue}>Analisar documento</button>
       </div>
     </section>
   );
@@ -93,9 +103,9 @@ function StructurePanel({ selectedId, onSelect }) {
 
   return (
     <aside className="workspace-panel structure-panel" aria-labelledby="structure-panel-title">
-      <header><h3 id="structure-panel-title">Estrutura</h3><span>{nodes.length} elementos</span></header>
-      <div className="structure-summary"><strong>{verified} verificados</strong><span>{needsReview} para revisar</span></div>
-      <nav className="structure-tree" aria-label="Estrutura semântica e ordem de leitura">
+      <header><h3 id="structure-panel-title">Estrutura sugerida</h3><span>{nodes.length} elementos</span></header>
+      <div className="structure-summary"><strong>{verified} confirmadas</strong><span>{needsReview} para revisar</span></div>
+      <nav className="structure-tree" aria-label="Estrutura sugerida e ordem de leitura">
         {nodes.map((node, index) => (
           <button
             key={node.id}
@@ -136,24 +146,50 @@ function ElementPreview({ selected }) {
   );
 }
 
+function AiSuggestion({ selected, onApply }) {
+  const suggestion = aiSuggestions[selected.id];
+
+  return (
+    <section className="ai-suggestion" aria-labelledby="ai-suggestion-title">
+      <header>
+        <strong id="ai-suggestion-title">Sugestão da IA</strong>
+        <span>{suggestion.confidence}% de confiança</span>
+      </header>
+      <p>{suggestion.text}</p>
+      <div>
+        <span>Proposta</span>
+        <strong>{suggestion.action}</strong>
+      </div>
+      <button type="button" onClick={onApply}>Aplicar sugestão</button>
+      <small>Confira o resultado antes de continuar.</small>
+    </section>
+  );
+}
+
 function InspectorPanel({ selected, altText, setAltText, onMessage }) {
+  const applySuggestion = () => {
+    if (selected.type === "figure") {
+      setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento.");
+    }
+    onMessage("Sugestão aplicada ao rascunho. Confira o resultado antes de exportar.");
+  };
+
   return (
     <aside className="workspace-panel inspector-panel" aria-labelledby="inspector-panel-title">
-      <header><h3 id="inspector-panel-title">Editar elemento</h3><span>{getTypeName(selected)}</span></header>
+      <header><h3 id="inspector-panel-title">Revisar elemento</h3><span>{getTypeName(selected)}</span></header>
       <ElementPreview selected={selected} />
       <div className="inspector-form">
+        <AiSuggestion selected={selected} onApply={applySuggestion} />
         <label>Tipo de elemento<input value={getTypeName(selected)} readOnly /></label>
         <label>Ordem de leitura<div className="order-input"><button type="button" aria-label="Mover para trás">−</button><input value={nodes.findIndex((node) => node.id === selected.id) + 1} readOnly aria-label="Posição na ordem de leitura" /><button type="button" aria-label="Mover para frente">+</button></div></label>
 
         {selected.type === "figure" && <>
           <label>Texto alternativo<textarea value={altText} onChange={(event) => setAltText(event.target.value)} rows="4" /></label>
           <label>Descrição longa<textarea placeholder="Descreva relações, dados e contexto visual…" rows="4" /></label>
-          <button className="secondary-action" type="button" onClick={() => { setAltText("Circunferência com o diâmetro marcado e uma seta indicando seu comprimento."); onMessage("Sugestão adicionada. Revise o texto antes de continuar."); }}>Sugerir texto alternativo</button>
         </>}
 
         {selected.type === "formula" && <>
           <label>Descrição textual<textarea defaultValue="Raiz quadrada de dois é aproximadamente um vírgula quatrocentos e quatorze." rows="5" /></label>
-          <button className="secondary-action" type="button" onClick={() => onMessage("Descrição adicionada. Confira a pronúncia antes de continuar.")}>Sugerir descrição</button>
         </>}
 
         {selected.type === "table" && <>
@@ -180,7 +216,7 @@ function WorkspaceScreen() {
 
   return (
     <section className="prototype-workspace">
-      <div className="workspace-context"><div><strong>capitulo-numeros-reais.pdf</strong><span>1 página · processamento local</span></div><span>Em revisão</span></div>
+      <div className="workspace-context"><div><strong>capitulo-numeros-reais.pdf</strong><span>1 página · modelo executado no dispositivo</span></div><span>Análise concluída</span></div>
       <div className={`workspace-grid mobile-tab-${mobileTab}`}>
         <StructurePanel selectedId={selectedId} onSelect={(id) => { setSelectedId(id); setMobileTab("inspector"); }} />
         <DocumentPanel selected={selected} />
@@ -189,10 +225,10 @@ function WorkspaceScreen() {
       <nav className="workspace-mobile-tabs" aria-label="Painéis do espaço de trabalho">
         <button className={mobileTab === "structure" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "structure"} onClick={() => setMobileTab("structure")}>Estrutura</button>
         <button className={mobileTab === "document" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "document"} onClick={() => setMobileTab("document")}>Documento</button>
-        <button className={mobileTab === "inspector" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "inspector"} onClick={() => setMobileTab("inspector")}>Elemento</button>
+        <button className={mobileTab === "inspector" ? "is-active" : ""} type="button" aria-pressed={mobileTab === "inspector"} onClick={() => setMobileTab("inspector")}>Revisão</button>
       </nav>
       <footer className="workspace-actions">
-        <span aria-live="polite">{message || "Este é um protótipo: as alterações não são salvas."}</span>
+        <span aria-live="polite">{message || "A IA montou uma primeira versão. Revise as sugestões antes de exportar."}</span>
         <button type="button" onClick={() => setMessage("A leitura em voz alta seria iniciada aqui.")}>Ouvir prévia</button>
         <button className="workspace-export" type="button" onClick={() => setMessage("Revise os três itens pendentes antes de exportar.")}>Exportar EPUB</button>
       </footer>
@@ -206,12 +242,12 @@ export function ProductInterfaceMockup() {
   return (
     <div className="product-prototype">
       <header className="prototype-header">
-        <div className="prototype-brand"><strong>Conversor acessível</strong><span>Protótipo acadêmico</span></div>
+        <div className="prototype-brand"><strong>Conversor acessível</strong><span>Revisão assistida por IA</span></div>
         <nav aria-label="Etapas do processo">
-          <button className={screen === "import" ? "is-current" : ""} type="button" aria-pressed={screen === "import"} onClick={() => setScreen("import")}>1. Importar</button>
-          <button className={screen === "workspace" ? "is-current" : ""} type="button" aria-pressed={screen === "workspace"} onClick={() => setScreen("workspace")}>2. Organizar e revisar</button>
+          <button className={screen === "import" ? "is-current" : ""} type="button" aria-pressed={screen === "import"} onClick={() => setScreen("import")}>1. Enviar arquivo</button>
+          <button className={screen === "workspace" ? "is-current" : ""} type="button" aria-pressed={screen === "workspace"} onClick={() => setScreen("workspace")}>2. Revisar sugestões</button>
         </nav>
-        <span className="prototype-mode">Processamento local</span>
+        <span className="prototype-mode">Modelo local</span>
       </header>
       {screen === "import" ? <ImportScreen onContinue={() => setScreen("workspace")} /> : <WorkspaceScreen />}
     </div>
