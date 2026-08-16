@@ -194,14 +194,28 @@ button { font: inherit; }
 .comparison-preview__x { left: 47%; background: #b54b4f; }
 .comparison-preview__check { right: -4px; background: #3a8d73; }
 
-.artifact-modal {
+.artifact-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: grid;
+  place-items: center;
+  padding: clamp(12px, 2vw, 24px);
+  background: rgba(25, 23, 27, 0.72);
+}
+
+.artifact-modal {
+  position: relative;
+  display: grid;
+  width: min(1720px, 100%);
+  height: min(980px, 100%);
   grid-template-rows: auto minmax(0, 1fr);
-  min-width: 320px;
+  min-width: 0;
+  overflow: hidden;
   background: #f8f7f2;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(13, 12, 15, 0.34);
 }
 
 .artifact-modal__header {
@@ -450,6 +464,8 @@ button { font: inherit; }
   .project-header h1 { margin-top: 28px; font-size: clamp(3rem, 15vw, 4.3rem); }
   .artifact-card { display: flex; }
   .artifact-card__preview { aspect-ratio: 16 / 9; margin: 10px 10px 0; }
+  .artifact-modal-backdrop { padding: 8px; }
+  .artifact-modal { border-radius: 9px; }
   .artifact-modal__header { min-height: 66px; }
   .icon-button--close span { display: none; }
   .viewer-helper { display: none; }
