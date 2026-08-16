@@ -3,7 +3,6 @@ export function Header() {
     <header className="project-header">
       <div className="event-mark" aria-label="OrionStar 2026">
         <span>OrionHub Lab · UFAL</span>
-        <span aria-hidden="true" className="event-mark__line" />
         <strong>OrionStar 2026</strong>
       </div>
 
